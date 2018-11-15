@@ -1,6 +1,73 @@
 import random as rd
 
 
+class Case:
+    dict_repr = {"⍈": "               \n" +
+                      "  ┏━━━━━━━━━┓  \n" +
+                      " ┯┛         ┗┯ \n" +
+                      " ┷┓         ┏┷ \n" +
+                      "  ┗━━━━━━━━━┛  \n" +
+                      "               \n",
+
+                 "x": "               \n" +
+                      "  ┏━━━━━━━━━┓  \n" +
+                      " ┯┛         ┗┯ \n" +
+                      " ┷┓         ┏┷ \n" +
+                      "  ┗━━━━━━━━━┛  \n" +
+                      "               \n",
+
+                 "┏": "               \n" +
+                      "  ┏━━━━━━━━━┓  \n" +
+                      "  ┃         ┗┯ \n" +
+                      "  ┃         ┏┷ \n" +
+                      "  ┗━━━┓ ┏━━━┛  \n" +
+                      "      ┠─┨      \n",
+
+                 "┣": "      ┠─┨      \n" +
+                      "  ┏━━━┛ ┗━━━┓  \n" +
+                      "  ┃         ┗┯ \n" +
+                      "  ┃         ┏┷ \n" +
+                      "  ┗━━━┓ ┏━━━┛  \n" +
+                      "      ┠─┨      \n",
+
+                 "┗": "      ┠─┨      \n" +
+                      "  ┏━━━┛ ┗━━━┓  \n" +
+                      "  ┃         ┗┯ \n" +
+                      "  ┃         ┏┷ \n" +
+                      "  ┗━━━━━━━━━┛  \n" +
+                      "               \n",
+
+                 "┓": "               \n" +
+                      "  ┏━━━━━━━━━┓  \n" +
+                      " ┯┛         ┃  \n" +
+                      " ┷┓         ┃  \n" +
+                      "  ┗━━━┓ ┏━━━┛  \n" +
+                      "      ┠─┨      \n",
+
+                 "┫": "      ┠─┨      \n" +
+                      "  ┏━━━┛ ┗━━━┓  \n" +
+                      " ┯┛         ┃  \n" +
+                      " ┷┓         ┃  \n" +
+                      "  ┗━━━┓ ┏━━━┛  \n" +
+                      "      ┠─┨      \n",
+
+                 "┛": "      ┠─┨      \n" +
+                      "  ┏━━━┛ ┗━━━┓  \n" +
+                      " ┯┛         ┃  \n" +
+                      " ┷┓         ┃  \n" +
+                      "  ┗━━━━━━━━━┛  \n" +
+                      "               \n",
+                 }
+
+    def __init__(self, x, y, type):
+        self.x = x
+        self.y = y
+        self.coords = "{} {}".format(x, y)
+        self.type = type
+
+    def __repr__(self):
+
+
 class Plateau:
     matrice = reception = porte = player = None
     list_case_teleportable = []
@@ -12,11 +79,11 @@ class Plateau:
         for y in range(len(Plateau.matrice)):
             for x in range(len(Plateau.matrice[y])):
                 current_case = Plateau.matrice[y][x]
-                Plateau.dict_case["{} {}".format(x, y)] = Case(x, y)
+                Plateau.dict_case["{} {}".format(x, y)] = Case(x, y, current_case)
                 if current_case not in [" ", "O"]:
-                    Plateau.list_case_teleportable.append(Case(x, y))
+                    Plateau.list_case_teleportable.append(Case(x, y, current_case))
                 if current_case == "o":
-                    Plateau.dict_room["{} {}".format(x, y)] = Room(x, y)
+                    Plateau.dict_room["{} {}".format(x, y)] = Room(x, y, )
                 elif current_case == "x":
                     Plateau.reception = Room(x, y)
                 elif current_case == "O":
@@ -53,13 +120,13 @@ class Plateau:
     @staticmethod
     def _gen_basic():
         return [[" ", " ", " ", " ", " ", " ", " ", " ", " "],
-                [" ", " ", "r", "⏤", "˥", " ", "O", " ", " "],
+                [" ", " ", "⎾", "⏤", "⏋", " ", "O", " ", " "],
                 [" ", " ", "|", " ", "|", " ", "|", " ", " "],
-                [" ", "o", "+", "o", "+", "o", "+", "o", " "],
-                [" ", "|", "|", " ", "|", " ", "|", "|", " "],
-                [" ", "o", "+", "o", "+", "o", "+", "o", " "],
-                [" ", "|", "|", " ", "|", " ", "|", "|", " "],
-                [" ", "o", "+", "o", "+", "o", "⏊", "o", " "],
+                [" ", "┏", "+", "⍈", "+", "⍈", "+", "┓", " "],
+                [" ", "┊", "|", " ", "|", " ", "|", "┊", " "],
+                [" ", "┣", "+", "⍈", "+", "⍈", "+", "┫", " "],
+                [" ", "┊", "|", " ", "|", " ", "|", "┊", " "],
+                [" ", "┗", "+", "⍈", "+", "⍈", "⏊", "┛", " "],
                 [" ", " ", "|", " ", "|", " ", " ", " ", " "],
                 [" ", " ", "⎿", "x", "⏌", " ", " ", " ", " "],
                 [" ", " ", " ", " ", " ", " ", " ", " ", " "]]
@@ -208,13 +275,6 @@ class Plateau:
         exit()
 
 
-class Case:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-        self.coords = "{} {}".format(x, y)
-
-
 class Contenu:
     def __repr__(self):
         return "Salle vide"
@@ -243,8 +303,8 @@ class Contenu:
 
 
 class Room(Case):
-    def __init__(self, x, y, contenu=Contenu()):
-        super(Room, self).__init__(x, y)
+    def __init__(self, x, y, type, contenu=Contenu()):
+        super(Room, self).__init__(x, y, type)
         self.contenu = contenu
         Plateau.dict_case["{} {}".format(x, y)] = self
 
