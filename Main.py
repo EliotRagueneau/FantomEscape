@@ -29,22 +29,23 @@ class Plateau:
             liste_pinte.append(new_amount)
             total_pinte -= new_amount
 
-        filled_rooms = rd.sample(list(Plateau.dict_room), 5 + len(liste_pinte))
+        list_filled_room_coords = rd.sample(list(Plateau.dict_room), 5 + len(liste_pinte))
 
-        Plateau.dict_room[filled_rooms[0]].contenu = LandLord()
+        Plateau.dict_room[list_filled_room_coords[0]].contenu = LandLord()
 
-        Plateau.dict_room[filled_rooms[1]].contenu = MadScientist()
+        Plateau.dict_room[list_filled_room_coords[1]].contenu = MadScientist()
 
-        for enemy_room in filled_rooms[2:5]:
+        for enemy_room in list_filled_room_coords[2:5]:
             Plateau.dict_room[enemy_room].contenu = Bibendum()
 
         n = 0
-        for pinte_room in filled_rooms[5:]:
+        for pinte_room in list_filled_room_coords[5:]:
             Plateau.dict_room[pinte_room].contenu = Energy(liste_pinte[n])
             n += 1
 
-        # for room in Plateau.list_room:
-        #     print(room.x, room.y, room.contenu)
+        for room_coords in Plateau.dict_room:
+            room = Plateau.dict_room[room_coords]
+            print(room.x, room.y, room.contenu)
 
         Plateau.player = Player()
         self.turn()
@@ -213,14 +214,11 @@ class Case:
         self.y = y
         self.coords = "{} {}".format(x, y)
 
-    def is_room(self):
-        return True if self.coords in Plateau.dict_room else False
-
-    def has_enemy(self):
-        return True if self.is_room() and isinstance(Plateau.dict_room[self.coords].contenu, Enemy) else False
-
 
 class Contenu:
+    def __repr__(self):
+        return "Salle vide"
+
     def effect(self):
         input()
         print('',
@@ -486,7 +484,6 @@ class Player:
 
 if __name__ == "__main__":
     print(Plateau())
-    print(Player().x)
 
 print("",
       "",
