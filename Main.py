@@ -113,9 +113,9 @@ class Plateau:
             if Plateau.player.coords in Plateau.dict_room:
                 Room.door_animation()
                 Plateau.dict_room[Plateau.player.coords].contenu.effect()
+                if Plateau.player.energy <= 0:
+                    self.loose()
                 Room.door_animation()
-            if Plateau.player.energy <= 0:
-                self.loose()
             if Plateau.player.coords == Plateau.porte.coords:
                 self.win()
             self.turn()
@@ -126,6 +126,60 @@ class Plateau:
 
     @staticmethod
     def win():
+        print("                                                   .-')                 ",
+              "                                                  /   |                 ",
+              "                                                .' /  F                 ",
+              "       /                                       /  / //)                 ",
+              "      /(                                     .< .'.''|                 ",
+              "     /_ `-._                              .')' ).'.'')                 ",
+              "     ' `-._ `-.                         .'.'.'/.''.'/-                 ",
+              "           `-._`-.__        .--.      .'-'/..'`).'.' /                 ",
+              "               `. / `.   _.':-::\   .' ' ).'.'/.' .''_         .')                 ",
+              "                 >- /_`.)::` -.)|--'.'-'--.'.'-..''  /       .' /                 ",
+              "                 |:|  `.>    )   ))'.'/-'/.-'.-'' _.'   _.-') .'                 ",
+              "                 /:|   `..:'       )_.>_.>_.-'_.-' `..-'.-')-'_                 ",
+              "                /::)___.-::::-.   ))__> <_.-'  _.--'_.-'_.-'_.'                 ",
+              "               /:' .::::::::\     ))-. .> __<-'  )_>_.-'--'.'                 ",
+              "               `::...         )  ))-.<_>__\____.-'---'_.-'--.                 ",
+              "                 `-:::::       ) ))-'__>-'____<__)--' `----'                 ",
+              "                     `-::): ..    )-->._\-----'__________>                 ",
+              "                       )    ::   >_>_`._ `--.->_____.--'                 ",
+              "                       |   :.\"\"  )\_ ___>----'-----'                 ",
+              "                       J:      \)\)`-`-.__`-.`--'                 ",
+              "                        >-\"\"\"\"-.\))\ \`-\`.__)-'                 ",
+              "                        / /\|`. :\/`--\_\`-'                 ",
+              "                        ).:: `::::`.                 ",
+              "                       /.::: ::'    `.                 ",
+              "                      (.:-::.:::' .-._)                    ___                 ",
+              "                        | :`-' \ /  `-.____              .' .(                 ",
+              "                        |::  (:   `,`.`.  :`._______   .'  :: \                 ",
+              "                        |:    \: ::  `  `---.:::::  `./  .:'  .)                 ",
+              "                        J:     :: `:  \   -::::::::' `:::' .::/                 ",
+              "                         \  |  \:: ::  `-.    -.  `:..:::::::'                 ",
+              "                         ) .    :::`::   _ `.  -. `::.-.__.'-.                 ",
+              "                         |:: \  `::  `.:.     `-.  `.`::::::' )                 ",
+              "                         |:|:\   \::  \ :.`.`:     `._ -::::-')                 ",
+              "                         |::      \:: ` \`::  \ `.`    `:::::(                 ",
+              "                         |::. \ \   ::    ` \  :\   \ .-._\"\"- \                 ",
+              "                          \\\\  :|   \\\\::\   \ : \: \  `. `::::::)                 ",
+              "                           \\\\ \:\    \ ::  \ :. \: |   -:::.---<                 ",
+              "                            \  \  \   :.::. | |  |:  \    :::::/                 ",
+              "                             \     \  `::\:: |    :  \       -'                 ",
+              "                              L       \ `:-.<: |  |:  `:..  < )                 ",
+              "                              || \   \   `.: `:    `:  `-:::.'                 ",
+              "                              ) : \    `    :\ :|. \::\  ._)                 ",
+              "                              | :|  :\ `:  \ :\ :<  `:::.|(                 ",
+              "                              /::   ::: ::  :\::::\   `:.'                 ",
+              "                              |::J :|::  :\  :\::-.\   (                 ",
+              "                              /    ):::| ):.):::|  \_. |                 ",
+              "                             |:.- :::::: :::::::/  `::/                 ",
+              "                             |:::::::-:::::::::'                 ",
+              "                            J:::::::  \::/ `-'                 ",
+              "                            |::::::|   \"\"                 ",
+              "                            `:::::'                 ",
+              "                              `-'                 ",
+              ""
+              , sep="\n")
         print("Félicitations, vous êtes arrivés à la porte du Paradis !")
         input()
         exit()
@@ -264,9 +318,9 @@ class LandLord(Enemy):
               "                    |_|_|",
               "                   /o | o\\",
               "                  /o _|_ o\\",
-              "                 (__/   \__) "
-              , sep="\n")
-        print("Retourne donc à la Réception mon très cher Gasper !")
+              "                 (__/   \__) ",
+              "Retourne donc à la Réception mon très cher Gasper !",
+              sep="\n")
         input()
         Plateau.player.move(Plateau.reception.x, Plateau.reception.y)
 
@@ -309,8 +363,10 @@ class MadScientist(Enemy):
             "    ___                  {}+               []",
             "   ( = )             .---'`---.            []",
             "    | |_            /          \   ________[]____",
-            "____| |_|==========(____________)_/______________\\", sep="\n")
-        print("Oh non ! Un scientifique fou se tient devant vous !!!")
+            "____| |_|==========(____________)_/______________\\",
+            "Oh non ! Un scientifique fou se tient devant vous !!!",
+            sep="\n")
+
         input()
         print("Dans sa fureur, il vous téléporte dans une salle aléatoire !")
         Plateau.player.energy -= 1
@@ -342,8 +398,10 @@ class Bibbendum(Enemy):
               "            (00       (0B              ",
               "            (00       (0B              ",
               "          (0000       (000B              ",
-              "         (OOOO0       (OOOOB              ", sep="\n")
-        print("Vous êtes paralysés !!!")
+              "         (OOOO0       (OOOOB              ",
+              "Vous êtes paralysés !!!",
+              sep="\n")
+
         input()
         input()
         input()
