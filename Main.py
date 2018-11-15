@@ -1,6 +1,194 @@
 import random as rd
 
 
+class Plateau:
+    matrice = reception = porte = player = None
+    dict_room_coords = {}
+    dict_case_coords = {}
+
+    def __init__(self, basic: bool = True):
+        Plateau.matrice = Plateau._gen_basic() if basic else Plateau._gen_random()
+        for y in range(len(Plateau.matrice)):
+            for x in range(len(Plateau.matrice[y])):
+                current_case = Plateau.matrice[y][x]
+                if current_case != " ":
+                    Plateau.dict_case_coords["{} {}".format(x, y)] = Case(x, y, current_case)
+
+                if current_case in ["┏", "⍈", "┏", "┣", "┗", "┓", "┫", "┛"]:
+                    Plateau.dict_room_coords["{} {}".format(x, y)] = Room(x, y, current_case)
+
+                if current_case == "x":
+                    Plateau.reception = Room(x, y, current_case)
+
+                elif current_case == "O":
+                    Plateau.porte = Room(x, y, current_case)
+
+        total_pinte = 5
+        liste_pinte = []
+        while total_pinte != 0:
+            new_amount = rd.randint(1, 3 if total_pinte >= 3 else total_pinte)
+            liste_pinte.append(new_amount)
+            total_pinte -= new_amount
+
+        list_filled_room_coords = rd.sample(list(Plateau.dict_room_coords), 5 + len(liste_pinte))
+
+        Plateau.dict_room_coords[list_filled_room_coords[0]].contenu = LandLord()
+
+        Plateau.dict_room_coords[list_filled_room_coords[1]].contenu = MadScientist()
+
+        for enemy_room in list_filled_room_coords[2:5]:
+            Plateau.dict_room_coords[enemy_room].contenu = Bibendum()
+
+        n = 0
+        for pinte_room in list_filled_room_coords[5:]:
+            Plateau.dict_room_coords[pinte_room].contenu = Energy(liste_pinte[n])
+            n += 1
+
+        Plateau.player = Player()
+        self.turn()
+
+    @staticmethod
+    def _gen_basic():
+        return [[" ", " ", " ", " ", " ", " ", " ", " ", " "],
+                [" ", " ", "⎾", "⏤", "⏋", " ", "O", " ", " "],
+                [" ", " ", "|", " ", "|", " ", "|", " ", " "],
+                [" ", "┏", "+", "⍈", "+", "⍈", "+", "┓", " "],
+                [" ", "┊", "|", " ", "|", " ", "|", "┊", " "],
+                [" ", "┣", "+", "⍈", "+", "⍈", "+", "┫", " "],
+                [" ", "┊", "|", " ", "|", " ", "|", "┊", " "],
+                [" ", "┗", "+", "⍈", "+", "⍈", "⏊", "┛", " "],
+                [" ", " ", "|", " ", "|", " ", " ", " ", " "],
+                [" ", " ", "⎿", "x", "⏌", " ", " ", " ", " "],
+                [" ", " ", " ", " ", " ", " ", " ", " ", " "]]
+
+    @staticmethod
+    def _gen_random():
+        pass
+
+    def __repr__(self):
+        return "\n".join(["".join(line) for line in Plateau.matrice])
+
+    def turn(self):
+        x = Plateau.player.x
+        y = Plateau.player.y
+        keys = {}
+
+        contour = {"z": {"coords": "{} {}".format(x, y - 1), "tuple": (x, y - 1)},
+                   "q": {"coords": "{} {}".format(x - 1, y), "tuple": (x - 1, y)},
+                   "s": {"coords": "{} {}".format(x, y + 1), "tuple": (x, y + 1)},
+                   "d": {"coords": "{} {}".format(x + 1, y), "tuple": (x + 1, y)}
+                   }
+
+        for key in contour:
+            if contour[key]["coords"] in Plateau.dict_case_coords:
+                keys[key] = contour[key]["tuple"]
+                if contour[key]["coords"] in Plateau.dict_room_coords:
+                    Plateau.dict_room_coords[contour[key]["coords"]].contenu.signature()
+
+        print(Plateau.dict_case_coords[Plateau.player.coords])
+        order = input()
+
+        if order in keys:
+            Plateau.player.move(keys[order][0], keys[order][1])
+
+            if Plateau.player.coords in Plateau.dict_room_coords:
+                Plateau.dict_room_coords[Plateau.player.coords].contenu.effect()
+
+                if Plateau.player.energy <= 0:
+                    self.loose()
+
+            if Plateau.player.coords == Plateau.porte.coords:
+                self.win()
+
+            self.turn()
+
+        else:
+            print("Tu ne peut pas aller par là")
+            self.turn()
+
+    @staticmethod
+    def win():
+        print("                                                   .-')                 ",
+              "                                                  /   |                 ",
+              "                                                .' /  F                 ",
+              "       /                                       /  / //)                 ",
+              "      /(                                     .< .'.''|                 ",
+              "     /_ `-._                              .')' ).'.'')                 ",
+              "     ' `-._ `-.                         .'.'.'/.''.'/-                 ",
+              "           `-._`-.__        .--.      .'-'/..'`).'.' /                 ",
+              "               `. / `.   _.':-::\   .' ' ).'.'/.' .''_         .')                 ",
+              "                 >- /_`.)::` -.)|--'.'-'--.'.'-..''  /       .' /                 ",
+              "                 |:|  `.>    )   ))'.'/-'/.-'.-'' _.'   _.-') .'                 ",
+              "                 /:|   `..:'       )_.>_.>_.-'_.-' `..-'.-')-'_                 ",
+              "                /::)___.-::::-.   ))__> <_.-'  _.--'_.-'_.-'_.'                 ",
+              "               /:' .::::::::\     ))-. .> __<-'  )_>_.-'--'.'                 ",
+              "               `::...         )  ))-.<_>__\____.-'---'_.-'--.                 ",
+              "                 `-:::::       ) ))-'__>-'____<__)--' `----'                 ",
+              "                     `-::): ..    )-->._\-----'__________>                 ",
+              "                       )    ::   >_>_`._ `--.->_____.--'                 ",
+              "                       |   :.\"\"  )\_ ___>----'-----'                 ",
+              "                       J:      \)\)`-`-.__`-.`--'                 ",
+              "                        >-\"\"\"\"-.\))\ \`-\`.__)-'                 ",
+              "                        / /\|`. :\/`--\_\`-'                 ",
+              "                        ).:: `::::`.                 ",
+              "                       /.::: ::'    `.                 ",
+              "                      (.:-::.:::' .-._)                    ___                 ",
+              "                        | :`-' \ /  `-.____              .' .(                 ",
+              "                        |::  (:   `,`.`.  :`._______   .'  :: \                 ",
+              "                        |:    \: ::  `  `---.:::::  `./  .:'  .)                 ",
+              "                        J:     :: `:  \   -::::::::' `:::' .::/                 ",
+              "                         \  |  \:: ::  `-.    -.  `:..:::::::'                 ",
+              "                         ) .    :::`::   _ `.  -. `::.-.__.'-.                 ",
+              "                         |:: \  `::  `.:.     `-.  `.`::::::' )                 ",
+              "                         |:|:\   \::  \ :.`.`:     `._ -::::-')                 ",
+              "                         |::      \:: ` \`::  \ `.`    `:::::(                 ",
+              "                         |::. \ \   ::    ` \  :\   \ .-._\"\"- \                 ",
+              "                          \\\\  :|   \\\\::\   \ : \: \  `. `::::::)                 ",
+              "                           \\\\ \:\    \ ::  \ :. \: |   -:::.---<                 ",
+              "                            \  \  \   :.::. | |  |:  \    :::::/                 ",
+              "                             \     \  `::\:: |    :  \       -'                 ",
+              "                              L       \ `:-.<: |  |:  `:..  < )                 ",
+              "                              || \   \   `.: `:    `:  `-:::.'                 ",
+              "                              ) : \    `    :\ :|. \::\  ._)                 ",
+              "                              | :|  :\ `:  \ :\ :<  `:::.|(                 ",
+              "                              /::   ::: ::  :\::::\   `:.'                 ",
+              "                              |::J :|::  :\  :\::-.\   (                 ",
+              "                              /    ):::| ):.):::|  \_. |                 ",
+              "                             |:.- :::::: :::::::/  `::/                 ",
+              "                             |:::::::-:::::::::'                 ",
+              "                            J:::::::  \::/ `-'                 ",
+              "                            |::::::|   \"\"                 ",
+              "                            `:::::'                 ",
+              "                              `-'                 ",
+              sep="\n")
+        print("Félicitations, vous êtes arrivés à la porte du Paradis !")
+        input()
+        exit()
+
+    @staticmethod
+    def loose():
+        print("                   _.-, ",
+              "              _ .-'  / .._",
+              "           .-:'/ - - \:::::-.",
+              "         .::: '  e e  ' '-::::.",
+              "        ::::'(    ^    )_.::::::",
+              "       ::::.' '.  o   '.::::'.'/_",
+              "   .  :::.'       -  .::::'_   _.:",
+              " .-''---' .'|      .::::'   '''::::",
+              "'. ..-:::'  |    .::::'        ::::",
+              " '.' ::::    \ .::::'          ::::",
+              "      ::::   .::::'           ::::",
+              "       ::::.::::'._          ::::",
+              "        ::::::' /  '-      .::::",
+              "         '::::-/__    __.-::::'",
+              "           '-::::::::::::::-'",
+              "               '''::::'''",
+              sep="\n")
+        print("Tu n'as plus d'énergie et tu errera désormais à jamais dans les limbes")
+        input()
+        exit()
+
+
 class Case:
     dict_repr = {"⍈": "               \n" +
                       "  ┏━━━━━━━━━┓  \n" +
@@ -122,220 +310,14 @@ class Case:
                       "               \n",
                  }
 
-    def __init__(self, x, y, type):
+    def __init__(self, x, y, symbole):
         self.x = x
         self.y = y
         self.coords = "{} {}".format(x, y)
-        self.type = type
+        self.type = symbole
 
     def __repr__(self):
         return Case.dict_repr[self.type]
-
-
-class Plateau:
-    matrice = reception = porte = player = None
-    dict_room = {}
-    dict_case = {}
-
-    def __init__(self, basic: bool = True):
-        Plateau.matrice = Plateau._gen_basic() if basic else Plateau._gen_random()
-        for y in range(len(Plateau.matrice)):
-            for x in range(len(Plateau.matrice[y])):
-                current_case = Plateau.matrice[y][x]
-                if current_case != " ":
-                    Plateau.dict_case["{} {}".format(x, y)] = Case(x, y, current_case)
-
-                if current_case in ["┏", "⍈", "┏", "┣", "┗", "┓", "┫", "┛"]:
-                    Plateau.dict_room["{} {}".format(x, y)] = Room(x, y, current_case)
-
-                if current_case == "x":
-                    Plateau.reception = Room(x, y, current_case)
-
-                elif current_case == "O":
-                    Plateau.porte = Room(x, y, current_case)
-
-        total_pinte = 5
-        liste_pinte = []
-        while total_pinte != 0:
-            new_amount = rd.randint(1, 3 if total_pinte >= 3 else total_pinte)
-            liste_pinte.append(new_amount)
-            total_pinte -= new_amount
-
-        list_filled_room_coords = rd.sample(list(Plateau.dict_room), 5 + len(liste_pinte))
-
-        Plateau.dict_room[list_filled_room_coords[0]].contenu = LandLord()
-
-        Plateau.dict_room[list_filled_room_coords[1]].contenu = MadScientist()
-
-        for enemy_room in list_filled_room_coords[2:5]:
-            Plateau.dict_room[enemy_room].contenu = Bibendum()
-
-        n = 0
-        for pinte_room in list_filled_room_coords[5:]:
-            Plateau.dict_room[pinte_room].contenu = Energy(liste_pinte[n])
-            n += 1
-
-        Plateau.player = Player()
-        self.turn()
-
-    @staticmethod
-    def _gen_basic():
-        return [[" ", " ", " ", " ", " ", " ", " ", " ", " "],
-                [" ", " ", "⎾", "⏤", "⏋", " ", "O", " ", " "],
-                [" ", " ", "|", " ", "|", " ", "|", " ", " "],
-                [" ", "┏", "+", "⍈", "+", "⍈", "+", "┓", " "],
-                [" ", "┊", "|", " ", "|", " ", "|", "┊", " "],
-                [" ", "┣", "+", "⍈", "+", "⍈", "+", "┫", " "],
-                [" ", "┊", "|", " ", "|", " ", "|", "┊", " "],
-                [" ", "┗", "+", "⍈", "+", "⍈", "⏊", "┛", " "],
-                [" ", " ", "|", " ", "|", " ", " ", " ", " "],
-                [" ", " ", "⎿", "x", "⏌", " ", " ", " ", " "],
-                [" ", " ", " ", " ", " ", " ", " ", " ", " "]]
-
-    @staticmethod
-    def _gen_random():
-        pass
-
-    def __repr__(self):
-        return "\n".join(["".join(line) for line in Plateau.matrice])
-
-    def turn(self):
-        x = Plateau.player.x
-        y = Plateau.player.y
-        # possible_movements = []
-        keys = {}
-
-        haut_coords = "{} {}".format(x, y - 1)
-
-        gauche_coords = "{} {}".format(x - 1, y)
-
-        bas_coords = "{} {}".format(x, y + 1)
-
-        droite_coords = "{} {}".format(x + 1, y)
-
-        if haut_coords in Plateau.dict_case:
-            keys["z"] = (x, y - 1)
-            if haut_coords in Plateau.dict_room:
-                Plateau.dict_room[haut_coords].contenu.signature()
-
-        if gauche_coords in Plateau.dict_case:
-            keys["q"] = (x - 1, y)
-            if gauche_coords in Plateau.dict_room:
-                Plateau.dict_room[gauche_coords].contenu.signature()
-
-        if bas_coords in Plateau.dict_case:
-            keys["s"] = (x, y + 1)
-            if bas_coords in Plateau.dict_room:
-                Plateau.dict_room[bas_coords].contenu.signature()
-
-        if droite_coords in Plateau.dict_case:
-            keys["d"] = (x + 1, y)
-            if droite_coords in Plateau.dict_room:
-                Plateau.dict_room[droite_coords].contenu.signature()
-
-        print(Plateau.dict_case[Plateau.player.coords])
-        order = input()
-
-        if order in keys:
-            Plateau.player.move(keys[order][0], keys[order][1])
-
-            if Plateau.player.coords in Plateau.dict_room:
-                Plateau.dict_room[Plateau.player.coords].contenu.effect()
-
-                if Plateau.player.energy <= 0:
-                    self.loose()
-
-            if Plateau.player.coords == Plateau.porte.coords:
-                self.win()
-
-            self.turn()
-
-        else:
-            print("Tu ne peut pas aller par là")
-            self.turn()
-
-    @staticmethod
-    def win():
-        print("                                                   .-')                 ",
-              "                                                  /   |                 ",
-              "                                                .' /  F                 ",
-              "       /                                       /  / //)                 ",
-              "      /(                                     .< .'.''|                 ",
-              "     /_ `-._                              .')' ).'.'')                 ",
-              "     ' `-._ `-.                         .'.'.'/.''.'/-                 ",
-              "           `-._`-.__        .--.      .'-'/..'`).'.' /                 ",
-              "               `. / `.   _.':-::\   .' ' ).'.'/.' .''_         .')                 ",
-              "                 >- /_`.)::` -.)|--'.'-'--.'.'-..''  /       .' /                 ",
-              "                 |:|  `.>    )   ))'.'/-'/.-'.-'' _.'   _.-') .'                 ",
-              "                 /:|   `..:'       )_.>_.>_.-'_.-' `..-'.-')-'_                 ",
-              "                /::)___.-::::-.   ))__> <_.-'  _.--'_.-'_.-'_.'                 ",
-              "               /:' .::::::::\     ))-. .> __<-'  )_>_.-'--'.'                 ",
-              "               `::...         )  ))-.<_>__\____.-'---'_.-'--.                 ",
-              "                 `-:::::       ) ))-'__>-'____<__)--' `----'                 ",
-              "                     `-::): ..    )-->._\-----'__________>                 ",
-              "                       )    ::   >_>_`._ `--.->_____.--'                 ",
-              "                       |   :.\"\"  )\_ ___>----'-----'                 ",
-              "                       J:      \)\)`-`-.__`-.`--'                 ",
-              "                        >-\"\"\"\"-.\))\ \`-\`.__)-'                 ",
-              "                        / /\|`. :\/`--\_\`-'                 ",
-              "                        ).:: `::::`.                 ",
-              "                       /.::: ::'    `.                 ",
-              "                      (.:-::.:::' .-._)                    ___                 ",
-              "                        | :`-' \ /  `-.____              .' .(                 ",
-              "                        |::  (:   `,`.`.  :`._______   .'  :: \                 ",
-              "                        |:    \: ::  `  `---.:::::  `./  .:'  .)                 ",
-              "                        J:     :: `:  \   -::::::::' `:::' .::/                 ",
-              "                         \  |  \:: ::  `-.    -.  `:..:::::::'                 ",
-              "                         ) .    :::`::   _ `.  -. `::.-.__.'-.                 ",
-              "                         |:: \  `::  `.:.     `-.  `.`::::::' )                 ",
-              "                         |:|:\   \::  \ :.`.`:     `._ -::::-')                 ",
-              "                         |::      \:: ` \`::  \ `.`    `:::::(                 ",
-              "                         |::. \ \   ::    ` \  :\   \ .-._\"\"- \                 ",
-              "                          \\\\  :|   \\\\::\   \ : \: \  `. `::::::)                 ",
-              "                           \\\\ \:\    \ ::  \ :. \: |   -:::.---<                 ",
-              "                            \  \  \   :.::. | |  |:  \    :::::/                 ",
-              "                             \     \  `::\:: |    :  \       -'                 ",
-              "                              L       \ `:-.<: |  |:  `:..  < )                 ",
-              "                              || \   \   `.: `:    `:  `-:::.'                 ",
-              "                              ) : \    `    :\ :|. \::\  ._)                 ",
-              "                              | :|  :\ `:  \ :\ :<  `:::.|(                 ",
-              "                              /::   ::: ::  :\::::\   `:.'                 ",
-              "                              |::J :|::  :\  :\::-.\   (                 ",
-              "                              /    ):::| ):.):::|  \_. |                 ",
-              "                             |:.- :::::: :::::::/  `::/                 ",
-              "                             |:::::::-:::::::::'                 ",
-              "                            J:::::::  \::/ `-'                 ",
-              "                            |::::::|   \"\"                 ",
-              "                            `:::::'                 ",
-              "                              `-'                 ",
-              ""
-              , sep="\n")
-        print("Félicitations, vous êtes arrivés à la porte du Paradis !")
-        input()
-        exit()
-
-    @staticmethod
-    def loose():
-        print("                   _.-, ",
-              "              _ .-'  / .._",
-              "           .-:'/ - - \:::::-.",
-              "         .::: '  e e  ' '-::::.",
-              "        ::::'(    ^    )_.::::::",
-              "       ::::.' '.  o   '.::::'.'/_",
-              "   .  :::.'       -  .::::'_   _.:",
-              " .-''---' .'|      .::::'   '''::::",
-              "'. ..-:::'  |    .::::'        ::::",
-              " '.' ::::    \ .::::'          ::::",
-              "      ::::   .::::'           ::::",
-              "       ::::.::::'._          ::::",
-              "        ::::::' /  '-      .::::",
-              "         '::::-/__    __.-::::'",
-              "           '-::::::::::::::-'",
-              "               '''::::'''",
-              sep="\n")
-        print("Tu n'as plus d'énergie et tu errera désormais à jamais dans les limbes")
-        input()
-        exit()
 
 
 class Contenu:
@@ -350,10 +332,10 @@ class Contenu:
 
 
 class Room(Case):
-    def __init__(self, x, y, type, contenu=Contenu()):
-        super(Room, self).__init__(x, y, type)
+    def __init__(self, x, y, symbole, contenu=Contenu()):
+        super(Room, self).__init__(x, y, symbole)
         self.contenu = contenu
-        Plateau.dict_case["{} {}".format(x, y)] = self
+        Plateau.dict_case_coords["{} {}".format(x, y)] = self
 
 
 class Enemy(Contenu):
@@ -439,7 +421,7 @@ class MadScientist(Enemy):
             sep="\n")
         print("Dans sa fureur, il vous téléporte dans une salle aléatoire !")
         Plateau.player.energy -= 1
-        chosen_case = Plateau.dict_case[rd.choice(list(Plateau.dict_case))]
+        chosen_case = Plateau.dict_case_coords[rd.choice(list(Plateau.dict_case_coords))]
         Plateau.player.move(chosen_case.x, chosen_case.y)
 
         print("Le bougre en a profiter pour vous subtiliser une pinte d'énergie ...")
@@ -535,7 +517,6 @@ class Energy(Contenu):
         print("Vous avez trouver {} pintes d'ectoplasme vert".format(self.amount))
         Plateau.player.energy += self.amount
         self.amount = 0
-        input()
 
 
 class Player:
