@@ -1,12 +1,9 @@
 import random as rd
-import os
-import sys
-import time
 
 
 class Plateau:
     matrice = reception = porte = player = None
-    list_case = []
+    list_case_teleportable = []
     dict_room = {}
     dict_case = {}
 
@@ -17,7 +14,7 @@ class Plateau:
                 current_case = Plateau.matrice[y][x]
                 Plateau.dict_case["{} {}".format(x, y)] = Case(x, y)
                 if current_case not in [" ", "O"]:
-                    Plateau.list_case.append(Case(x, y))
+                    Plateau.list_case_teleportable.append(Case(x, y))
                 if current_case == "o":
                     Plateau.dict_room["{} {}".format(x, y)] = Room(x, y)
                 elif current_case == "x":
@@ -28,16 +25,18 @@ class Plateau:
         total_pinte = 5
         liste_pinte = []
         while total_pinte != 0:
-            max_pinte_per_room = 3 if total_pinte >= 3 else total_pinte
-            new_amount = rd.randint(1, max_pinte_per_room)
+            new_amount = rd.randint(1, 3 if total_pinte >= 3 else total_pinte)
             liste_pinte.append(new_amount)
             total_pinte -= new_amount
 
         filled_rooms = rd.sample(list(Plateau.dict_room), 5 + len(liste_pinte))
+
         Plateau.dict_room[filled_rooms[0]].contenu = LandLord()
+
         Plateau.dict_room[filled_rooms[1]].contenu = MadScientist()
+
         for enemy_room in filled_rooms[2:5]:
-            Plateau.dict_room[enemy_room].contenu = Bibbendum()
+            Plateau.dict_room[enemy_room].contenu = Bibendum()
 
         n = 0
         for pinte_room in filled_rooms[5:]:
@@ -249,6 +248,7 @@ class Room(Case):
     def __init__(self, x, y, contenu=Contenu()):
         super(Room, self).__init__(x, y)
         self.contenu = contenu
+        Plateau.dict_case["{} {}".format(x, y)] = self
 
     @staticmethod
     def door_animation():
@@ -370,7 +370,7 @@ class MadScientist(Enemy):
         input()
         print("Dans sa fureur, il vous téléporte dans une salle aléatoire !")
         Plateau.player.energy -= 1
-        chosen_case = rd.choice(Plateau.list_case)
+        chosen_case = rd.choice(Plateau.list_case_teleportable)
         Plateau.player.move(chosen_case.x, chosen_case.y)
 
         print("Le bougre en a profiter pour vous subtiliser une pinte d'énergie ...")
@@ -379,26 +379,58 @@ class MadScientist(Enemy):
         return "MadScientist"
 
 
-class Bibbendum(Enemy):
+class Bibendum(Enemy):
     def signature(self):
         print("Ça sent bon par ici !")
 
     def effect(self):
         input()
-        print("                 (0B",
-              "                (000B",
-              "              (0000000B              ",
-              "             (000000000B              ",
-              "              (0000000B              ",
-              "             (000000000B              ",
-              "              (0000000B              ",
-              "               (00 (0B              ",
-              "              (00   (0B              ",
-              "             (00     (0B              ",
-              "            (00       (0B              ",
-              "            (00       (0B              ",
-              "          (0000       (000B              ",
-              "         (OOOO0       (OOOOB              ",
+        print("     ,...._                          _,.._",
+              "    (  \ \\\"b_.._                  _,d8P\"\"Y8o.",
+              "    `8\ \ \ 8P\"8                 ,8\"  _    _Yb.",
+              "     8 \ \ `8. 8.                8' ,'\"'.,'\".l8",
+              "     Y  `__,9' Yb               ,8o.[(#)][(#]'Yo",
+              "     `Y.       l8.             jP'   '\"' `'\"' '8b",
+              "       `8b.    8\"\"b            ll     .----,   8P",
+              "       ,dP\"._  \"  88b.         '8b.    `\"\"'  ,d8._",
+              "       l8[ `\"    ,P `88888bod88888K.        .9\"\"\"\"'Yo._",
+              "       `8bo____,o\"   8 `8K\"Yb.                       YP\"b.",
+              "        Y8.\"\"\"\"'    ,P  `8.  Yb                    _,db. Yb",
+              "         Y8b.     ,d\"    8l   8o...___     ____,,,o\"' `Ybl8",
+              "          `88oooo\"\"     ,8'   l[`\"\"Y88888888P\"\"''      `8d8b.",
+              "           `Yb._      ,d8P    d'                       ,8P Y8",
+              "             `Y8boooodP\"     dP                      _,8b   8'",
+              "                `Y8bo.____,od8o._                _,odP  Yb d8",
+              "                   `\"\"Y8P\"\"'  `\"\"\"Yoooo,,,,,,oooo\"\"\"'   dP\"\"Yb",
+              "                      `Yb.          `\"\"\"\"\"\"\"\"'         ,8'   8b",
+              "                       ,8oo.                         _,P'   ,PYb.",
+              "                       l8 `\"oo._                  _,o88b ,o8P  `8b",
+              "                       '8b   `\"\"ooo,,,,,,,,,,,ooodP\"  8P\"\"'     JP",
+              "                      ,d^Yb_       `\"\"\"\"\"\"\"\"\"\"'      d8b._    ,d8b",
+              "                      lP  `Yb._                  _,,888\"\"8boo\"' `\"bo.",
+              "                      'b    `\"\"8boo,,,,,,,,,,,ood8P' 88    ,8P.  `o 8b",
+              "                     ,d8.       `\"\"\"\"\"\"\"\"7T\"\"\"''    dP'    `Y',\"oo\" Y8",
+              "                     8P`Yo_             ,d'      _,d88      `Y./o8ooP'",
+              "                     8'  `\"8.__      _,d8boooooo\"\"' 88        `\"",
+              "                     8b     `\"\"ooooo\"\"'8'          d8'",
+              "                    ,d8b             ,88._     _,d8P",
+              "                  ,d88 `Yb.        ,d8' `\"\"8888\"' 8'",
+              "                 d8P`8.  `\"\"oooood88\"\"8.        _,8b",
+              "                 8l  \"b.         d88. `\"8o,,,,,o\"' 8",
+              "                 Yl   `\"o,,___,od8'`8.   `\"\"\"\"'   ,P",
+              "                ,d8.     `\"\"\"\"\"' 8  d8o.       _,dP",
+              "               ,8' Yo.         ,d'  8l \"Yoooooo\"\"8",
+              "               '8.  `\"o,,,,,,od\"'   Yb.         d8",
+              "                Yb.         ,8'      `8b.____,d8\"",
+              "                 `8b.__  _,d8'       ,o8\"\"\"\"\"\"b",
+              "                ,dP `\"\"\"8\"\"'         l8'   \"\"\"8b.",
+              "               ,8\" \"\"\" dP            '8.    \"\"\"`\"8b.",
+              "              dP' `\"\"\" 8b             `\"b.        `Yb",
+              "             d         `8               `8b       ,l8",
+              "             8         ,8                `8bo,,,d88P'",
+              "             `8o.__  _,d8'                  `\"\"\"\"'",
+              "               `\"88888\"'",
+              "",
               "Vous êtes paralysés !!!",
               sep="\n")
 
