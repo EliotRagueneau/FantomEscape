@@ -1,6 +1,5 @@
 import random as rd
 
-
 class Case:
     dict_repr = {"⍈": "               \n" +
                       "  ┏━━━━━━━━━┓  \n" +
@@ -57,6 +56,69 @@ class Case:
                       " ┷┓         ┃  \n" +
                       "  ┗━━━━━━━━━┛  \n" +
                       "               \n",
+
+                 "┊": "      ┠─┨      \n" +
+                      "      ┃ ┃      \n" +
+                      "      ┃ ┃      \n" +
+                      "      ┃ ┃      \n" +
+                      "      ┃ ┃      \n" +
+                      "      ┠─┨      \n",
+
+                 "|": "      ┋ ┋      \n" +
+                      "      ┃ ┃      \n" +
+                      "      ┃ ┃      \n" +
+                      "      ┃ ┃      \n" +
+                      "      ┃ ┃      \n" +
+                      "      ┋ ┋      \n",
+
+                 "⎿": "      ┋ ┋      \n" +
+                      "      ┃ ┃      \n" +
+                      "      ┃ ┗━━━━━┯\n" +
+                      "      ┗━━━━━━━┷\n" +
+                      "               \n" +
+                      "               \n",
+
+                 "⏌": "      ┋ ┋      \n" +
+                      "      ┃ ┃      \n" +
+                      "┯━━━━━┛ ┃      \n" +
+                      "┷━━━━━━━┛      \n" +
+                      "               \n" +
+                      "               \n",
+
+                 "+": "      ┋ ┋      \n" +
+                      "      ┃ ┃      \n" +
+                      "┯━━━━━┛ ┗━━━━━┯\n" +
+                      "┷━━━━━┓ ┏━━━━━┷\n" +
+                      "      ┃ ┃      \n" +
+                      "      ┋ ┋      \n",
+
+                 "⎾": "               \n" +
+                      "               \n" +
+                      "      ┏━━━━━━━┉\n" +
+                      "      ┃ ┏━━━━━┉\n" +
+                      "      ┃ ┃      \n" +
+                      "      ┋ ┋      \n",
+
+                 "⏤": "               \n" +
+                      "               \n" +
+                      "┉━━━━━━━━━━━━━┉\n" +
+                      "┉━━━━━━━━━━━━━┉\n" +
+                      "               \n" +
+                      "               \n",
+
+                 "⏋": "               \n" +
+                      "               \n" +
+                      "┉━━━━━━━┓      \n" +
+                      "┉━━━━━┓ ┃      \n" +
+                      "      ┃ ┃      \n" +
+                      "      ┋ ┋      \n",
+
+                 "⏊": "      ┋ ┋      \n" +
+                      "      ┃ ┃      \n" +
+                      "┯━━━━━┛ ┗━━━━━┯\n" +
+                      "┷━━━━━━━━━━━━━┷\n" +
+                      "               \n" +
+                      "               \n",
                  }
 
     def __init__(self, x, y, type):
@@ -66,11 +128,11 @@ class Case:
         self.type = type
 
     def __repr__(self):
+        return Case.dict_repr[self.type]
 
 
 class Plateau:
     matrice = reception = porte = player = None
-    list_case_teleportable = []
     dict_room = {}
     dict_case = {}
 
@@ -80,14 +142,15 @@ class Plateau:
             for x in range(len(Plateau.matrice[y])):
                 current_case = Plateau.matrice[y][x]
                 Plateau.dict_case["{} {}".format(x, y)] = Case(x, y, current_case)
-                if current_case not in [" ", "O"]:
-                    Plateau.list_case_teleportable.append(Case(x, y, current_case))
-                if current_case == "o":
-                    Plateau.dict_room["{} {}".format(x, y)] = Room(x, y, )
-                elif current_case == "x":
-                    Plateau.reception = Room(x, y)
+
+                if current_case in ["┏", "⍈", "┏", "┣", "┗", "┓", "┫", "┛"]:
+                    Plateau.dict_room["{} {}".format(x, y)] = Room(x, y, current_case)
+
+                if current_case == "x":
+                    Plateau.reception = Room(x, y, current_case)
+
                 elif current_case == "O":
-                    Plateau.porte = Room(x, y)
+                    Plateau.porte = Room(x, y, current_case)
 
         total_pinte = 5
         liste_pinte = []
@@ -109,10 +172,6 @@ class Plateau:
         for pinte_room in list_filled_room_coords[5:]:
             Plateau.dict_room[pinte_room].contenu = Energy(liste_pinte[n])
             n += 1
-
-        for room_coords in Plateau.dict_room:
-            room = Plateau.dict_room[room_coords]
-            print(room.x, room.y, room.contenu)
 
         Plateau.player = Player()
         self.turn()
@@ -141,48 +200,52 @@ class Plateau:
     def turn(self):
         x = Plateau.player.x
         y = Plateau.player.y
-        possible_movements = []
+        # possible_movements = []
         keys = {}
-        haut = Plateau.matrice[y - 1][x]
-        gauche = Plateau.matrice[y][x - 1]
-        bas = Plateau.matrice[y + 1][x]
-        droite = Plateau.matrice[y][x + 1]
-        if haut != " ":
-            possible_movements.append("haut : z")
+
+        haut_coords = "{} {}".format(x, y - 1)
+
+        gauche_coords = "{} {}".format(x - 1, y)
+
+        bas_coords = "{} {}".format(x, y + 1)
+
+        droite_coords = "{} {}".format(x + 1, y)
+
+        if haut_coords in Plateau.dict_case:
+            # possible_movements.append("haut : z")
             keys["z"] = (x, y - 1)
-            if haut == "o":
-                Plateau.dict_room["{} {}".format(x, y - 1)].contenu.signature()
+            if haut_coords in Plateau.dict_room:
+                Plateau.dict_room[haut_coords].contenu.signature()
 
-        if gauche != " ":
-            possible_movements.append("gauche : q")
+        if gauche_coords in Plateau.dict_case:
+            # possible_movements.append("gauche : q")
             keys["q"] = (x - 1, y)
-            if gauche == "o":
-                Plateau.dict_room["{} {}".format(x - 1, y)].contenu.signature()
+            if gauche_coords in Plateau.dict_room:
+                Plateau.dict_room[gauche_coords].contenu.signature()
 
-        if bas != " ":
-            possible_movements.append("bas : s")
+        if bas_coords in Plateau.dict_case:
+            # possible_movements.append("bas : s")
             keys["s"] = (x, y + 1)
-            if bas == "o":
-                Plateau.dict_room["{} {}".format(x, y + 1)].contenu.signature()
+            if bas_coords in Plateau.dict_room:
+                Plateau.dict_room[bas_coords].contenu.signature()
 
-        if droite != " ":
-            possible_movements.append("droite : d")
+        if droite_coords in Plateau.dict_case:
+            # possible_movements.append("droite : d")
             keys["d"] = (x + 1, y)
-            if droite == "o":
-                Plateau.dict_room["{} {}".format(x + 1, y)].contenu.signature()
+            if droite_coords in Plateau.dict_room:
+                Plateau.dict_room[droite_coords].contenu.signature()
 
-        for movement in possible_movements:
-            print(movement)
+        print(Plateau.dict_case[Plateau.player.coords])
         order = input()
 
         if order in keys:
             Plateau.player.move(keys[order][0], keys[order][1])
             if Plateau.player.coords in Plateau.dict_room:
-                Room.door_animation()
+                # Room.door_animation()
                 Plateau.dict_room[Plateau.player.coords].contenu.effect()
                 if Plateau.player.energy <= 0:
                     self.loose()
-                Room.door_animation()
+                # Room.door_animation()
             if Plateau.player.coords == Plateau.porte.coords:
                 self.win()
             self.turn()
@@ -280,23 +343,25 @@ class Contenu:
         return "Salle vide"
 
     def effect(self):
-        input()
-        print('',
-              '',
-              '               .-----.                                _.----"""""""----._',
-              '          _.---//-"""-\\\\---._            .------.___  (                   )',
-              '         (   (/        `-\'   )          (        ___|-|`"""---..___..---""|',
-              '        _|`"--._________.--"\'|_          `---\'"""     |                   |',
-              '       (_|                   |_)                      |                   |',
-              '       `--)                 (--\'          ________    |                   |',
-              '         |                   |   _.--"""""        """"----._              |',
-              '         |                   |  (_                         _)--.----------------.',
-              '         |                   |   \`""---...________...----\'/__/___             ||',
-              "         `-.__           __.-'    \___                  __/ ""-----\"\"\"\"\"\"\"-----`''",
-              '              `""-----""\'              ""`-----------'"",
-              '',
-              sep='\n')
-        input()
+        pass
+
+    #     input()
+    #     print('',
+    #           '',
+    #           '               .-----.                                _.----"""""""----._',
+    #           '          _.---//-"""-\\\\---._            .------.___  (                   )',
+    #           '         (   (/        `-\'   )          (        ___|-|`"""---..___..---""|',
+    #           '        _|`"--._________.--"\'|_          `---\'"""     |                   |',
+    #           '       (_|                   |_)                      |                   |',
+    #           '       `--)                 (--\'          ________    |                   |',
+    #           '         |                   |   _.--"""""        """"----._              |',
+    #           '         |                   |  (_                         _)--.----------------.',
+    #           '         |                   |   \`""---...________...----\'/__/___             ||',
+    #           "         `-.__           __.-'    \___                  __/ ""-----\"\"\"\"\"\"\"-----`''",
+    #           '              `""-----""\'              ""`-----------'"",
+    #           '',
+    #           sep='\n')
+    #     input()
 
     def signature(self):
         pass
@@ -352,7 +417,6 @@ class LandLord(Enemy):
         print("Cling Cling !")
 
     def effect(self):
-        input()
         print("                               _________",
               "                              [_________]",
               "                      ,,,,,      _|//",
@@ -391,7 +455,6 @@ class MadScientist(Enemy):
         print("Mwah ah ah ah !")
 
     def effect(self):
-        input()
         print(
             "                           __              []",
             "                           ||              []",
@@ -428,7 +491,7 @@ class MadScientist(Enemy):
         input()
         print("Dans sa fureur, il vous téléporte dans une salle aléatoire !")
         Plateau.player.energy -= 1
-        chosen_case = rd.choice(Plateau.list_case_teleportable)
+        chosen_case = Plateau.dict_case[rd.choice(list(Plateau.dict_case))]
         Plateau.player.move(chosen_case.x, chosen_case.y)
 
         print("Le bougre en a profiter pour vous subtiliser une pinte d'énergie ...")
@@ -442,7 +505,6 @@ class Bibendum(Enemy):
         print("Ça sent bon par ici !")
 
     def effect(self):
-        input()
         print("     ,...._                          _,.._",
               "    (  \ \\\"b_.._                  _,d8P\"\"Y8o.",
               "    `8\ \ \ 8P\"8                 ,8\"  _    _Yb.",
@@ -510,7 +572,6 @@ class Energy(Contenu):
         return "{} pintes vertes d'énergie".format(self.amount)
 
     def effect(self):
-        input()
         print(
             "           _",
             "        ,-'  `-._",
@@ -519,7 +580,7 @@ class Energy(Contenu):
             "        | !!    |",
             "        | !!    |",
             "        |       |",
-            "        |       | hjw",
+            "        |       |",
             "        `======='",
             sep="\n")
         print("Vous avez trouver {} pintes d'ectoplasme vert".format(self.amount))
@@ -544,63 +605,3 @@ class Player:
 
 if __name__ == "__main__":
     print(Plateau())
-
-print("",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "", sep="\n")
-
-print('',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '', sep='\n')
