@@ -33,3 +33,4 @@ taille = self.map()
 print("le jeu se déroulera sur une plateforme possédant", taille, "cases")
 dico_gaspard = self.personnage()
 # print(dico_gaspard)
+

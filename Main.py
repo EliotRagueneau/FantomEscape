@@ -1,5 +1,6 @@
 import random as rd
 
+
 class Case:
     dict_repr = {"⍈": "               \n" +
                       "  ┏━━━━━━━━━┓  \n" +
@@ -141,7 +142,8 @@ class Plateau:
         for y in range(len(Plateau.matrice)):
             for x in range(len(Plateau.matrice[y])):
                 current_case = Plateau.matrice[y][x]
-                Plateau.dict_case["{} {}".format(x, y)] = Case(x, y, current_case)
+                if current_case != " ":
+                    Plateau.dict_case["{} {}".format(x, y)] = Case(x, y, current_case)
 
                 if current_case in ["┏", "⍈", "┏", "┣", "┗", "┓", "┫", "┛"]:
                     Plateau.dict_room["{} {}".format(x, y)] = Room(x, y, current_case)
@@ -212,25 +214,21 @@ class Plateau:
         droite_coords = "{} {}".format(x + 1, y)
 
         if haut_coords in Plateau.dict_case:
-            # possible_movements.append("haut : z")
             keys["z"] = (x, y - 1)
             if haut_coords in Plateau.dict_room:
                 Plateau.dict_room[haut_coords].contenu.signature()
 
         if gauche_coords in Plateau.dict_case:
-            # possible_movements.append("gauche : q")
             keys["q"] = (x - 1, y)
             if gauche_coords in Plateau.dict_room:
                 Plateau.dict_room[gauche_coords].contenu.signature()
 
         if bas_coords in Plateau.dict_case:
-            # possible_movements.append("bas : s")
             keys["s"] = (x, y + 1)
             if bas_coords in Plateau.dict_room:
                 Plateau.dict_room[bas_coords].contenu.signature()
 
         if droite_coords in Plateau.dict_case:
-            # possible_movements.append("droite : d")
             keys["d"] = (x + 1, y)
             if droite_coords in Plateau.dict_room:
                 Plateau.dict_room[droite_coords].contenu.signature()
@@ -240,14 +238,16 @@ class Plateau:
 
         if order in keys:
             Plateau.player.move(keys[order][0], keys[order][1])
+
             if Plateau.player.coords in Plateau.dict_room:
-                # Room.door_animation()
                 Plateau.dict_room[Plateau.player.coords].contenu.effect()
+
                 if Plateau.player.energy <= 0:
                     self.loose()
-                # Room.door_animation()
+
             if Plateau.player.coords == Plateau.porte.coords:
                 self.win()
+
             self.turn()
 
         else:
@@ -345,24 +345,6 @@ class Contenu:
     def effect(self):
         pass
 
-    #     input()
-    #     print('',
-    #           '',
-    #           '               .-----.                                _.----"""""""----._',
-    #           '          _.---//-"""-\\\\---._            .------.___  (                   )',
-    #           '         (   (/        `-\'   )          (        ___|-|`"""---..___..---""|',
-    #           '        _|`"--._________.--"\'|_          `---\'"""     |                   |',
-    #           '       (_|                   |_)                      |                   |',
-    #           '       `--)                 (--\'          ________    |                   |',
-    #           '         |                   |   _.--"""""        """"----._              |',
-    #           '         |                   |  (_                         _)--.----------------.',
-    #           '         |                   |   \`""---...________...----\'/__/___             ||',
-    #           "         `-.__           __.-'    \___                  __/ ""-----\"\"\"\"\"\"\"-----`''",
-    #           '              `""-----""\'              ""`-----------'"",
-    #           '',
-    #           sep='\n')
-    #     input()
-
     def signature(self):
         pass
 
@@ -372,40 +354,6 @@ class Room(Case):
         super(Room, self).__init__(x, y, type)
         self.contenu = contenu
         Plateau.dict_case["{} {}".format(x, y)] = self
-
-    @staticmethod
-    def door_animation():
-        print(" ______________",
-              "|\ ___________ /|",
-              "| |  _ _ _ _  | |",
-              "| | | | | | | | |",
-              "| | |-+-+-+-| | |",
-              "| | |-+-+=+%| | |",
-              "| | |_|_|_|_| | |",
-              "| |    ___    | |",
-              "| |   [___] ()| |",
-              "| |         ||| |",
-              "| |         ()| |",
-              "| |           | |",
-              "| |           | |",
-              "| |           | |",
-              "|_|___________|_|", sep="\n")
-        input()
-        print(" ______________",
-              "|\ ___________ /|",
-              "| |  /|,| |   | |",
-              "| | |,x,| |   | |",
-              "| | |,x,' |   | |",
-              "| | |,x   ,   | |",
-              "| | |/    |   | |",
-              "| |    /] ,   | |",
-              "| |   [/ ()   | |",
-              "| |       |   | |",
-              "| |       |   | |",
-              "| |       |   | |",
-              "| |      ,'   | |",
-              "| |   ,'      | |",
-              "|_|,'_________|_|\n", sep="\n")
 
 
 class Enemy(Contenu):
@@ -456,45 +404,46 @@ class MadScientist(Enemy):
 
     def effect(self):
         print(
-            "                           __              []",
-            "                           ||              []",
-            "                           ||              []",
-            "                           ||              []",
-            "                        __ ||              []",
-            "                        || ||              []",
-            "                      .-||-||-.            []  /\\",
-            "                     _\_______/_===========[]=(-o)",
-            "                      )\_____/(            []  \/",
-            "                     /     ||  \           []",
-            "                    /      ||   \          []",
-            "                   /       ||    \         []",
-            "                  /~~~~~~~~~~~~~~~\        []",
-            "                 /         ::      \       []",
-            "                (          ::       )      []",
-            "                 `-----------------'       []",
-            "                         )                 []",
-            "                       (   )               []",
-            "                         )( . (            []",
-            "                      .) @@)   )           []",
-            "                   ` ) @@(@@)@             []",
-            "                     (@@(@@)@              []",
-            "                      @(@.@)@@             []",
-            "                    ` (@{__}@)`            []",
-            "                        :__;               []",
-            "    ___                  {}+               []",
-            "   ( = )             .---'`---.            []",
-            "    | |_            /          \   ________[]____",
-            "____| |_|==========(____________)_/______________\\",
-            "Oh non ! Un scientifique fou se tient devant vous !!!",
+            "                                            . ",
+            "                        .   \\ \\ / \\ \\|   \\ | / /  ,",
+            "                      \\  \\  | | |  |/ \\  | | |/  /  | .",
+            "                    \\  |  \\ \\ | \\ / | | / / / | |   /_/  /",
+            "                \\_ \\ \\ \\  |  |\\ | | | / | | | / _/,-'/_,-' /",
+            "            _   _ \\ \\|  \\_\\_  \\| \\ \\\\ | |/ / / / _/ _/,---'  /",
+            "             \\___\\ \\_ \\__ \\ \\ | \\ \\ | / // | / // _/_/__/ __/_",
+            "           __  _ \\_  \\   \\  |  \\ \\  |/ |/  | | / / / /___/ _/ _/",
+            "         _   \\___  \\                                 /  _____/",
+            "          \\_ \\__ \\    -------.___    -----._______     / _/  __/",
+            "            \\__ \\    _____       -----              __  / __/",
+            "               \\               _______   ------'         /",
+            "            __ |     ___________         ___________     | __",
+            "           /  `| ,-' ___________ '.   ,' ___________ `-. |'  \\",
+            "           | /` (_,-' _______   `./   \\,'   _______ `-._) '\\ |",
+            "           | |     ,-'   `._,`-.         ,-'   `._,`-.     | |",
+            "           | |.  ,' `.          `.     ,' `.          `.  :| |",
+            "           | \\   `.   `-._____,-,'     `.   `-._____,-,'   / |",
+            "            \\  '   `-._______,-'  :   :  `-._______,-'    ' / ",
+            "             \\_.                  |   |                  ._/",
+            "               |                  |   |                  |",
+            "                \\                /     \\                /",
+            "                 \\              /       \\              /",
+            "                  \\            |         |            /",
+            "                   |           \\,--._,--./           |",
+            "                   |       _,.--'''`-'''`--.._       |",
+            "--.  ,---.  ,---.  |     ,' __,-----------.__ `.     ,---.  ,---.  ,---.  ,---.",
+            "-- \\(     \\(  -- \\_|____/_,'\\/|  |  |  |  |\\/`._\\__ / --  )/     )/ --  )/,--, )",
+            ".--.\\\\  -- \\\\ .--.\\           `-.|__|__|,-'        /,--, // --  //,--, /(/__/ /",
+            " \\__\\)\\ .--.\\\\ \\__\\)                              (/__/ //,--, /(/__/ /  `---'",
+            "`---'  \\ \\__\\)`---'                                `---'(/__/ /  `---'",
+            "        `---'                                            `---'",
             sep="\n")
-
-        input()
         print("Dans sa fureur, il vous téléporte dans une salle aléatoire !")
         Plateau.player.energy -= 1
         chosen_case = Plateau.dict_case[rd.choice(list(Plateau.dict_case))]
         Plateau.player.move(chosen_case.x, chosen_case.y)
 
         print("Le bougre en a profiter pour vous subtiliser une pinte d'énergie ...")
+        input()
 
     def __repr__(self):
         return "MadScientist"
@@ -511,8 +460,8 @@ class Bibendum(Enemy):
               "     8 \ \ `8. 8.                8' ,'\"'.,'\".l8",
               "     Y  `__,9' Yb               ,8o.[(#)][(#]'Yo",
               "     `Y.       l8.             jP'   '\"' `'\"' '8b",
-              "       `8b.    8\"\"b            ll     .----,   8P",
-              "       ,dP\"._  \"  88b.         '8b.    `\"\"'  ,d8._",
+              "       `8b.    8\"\"b            ll      ----    8P",
+              "       ,dP\"._  \"  88b.         '8b.          ,d8._",
               "       l8[ `\"    ,P `88888bod88888K.        .9\"\"\"\"'Yo._",
               "       `8bo____,o\"   8 `8K\"Yb.                       YP\"b.",
               "        Y8.\"\"\"\"'    ,P  `8.  Yb                    _,db. Yb",
