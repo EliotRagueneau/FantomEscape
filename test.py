@@ -25,7 +25,7 @@ import random
 #     #     for _ in range(9)]:
 #     #         [[" "] * 11]
 
-#matrice=[[" "] * 11] + [[" "] + [x for _ in range(11) for x in random.choice(["┏", "⍈", "┏", "┣", "┗", "┓", "┫", "┛"])] + [" "] for _ in range(9)] + [[" "] * 11]
+# matrice=[[" "] * 11] + [[" "] + [x for _ in range(11) for x in random.choice(["┏", "⍈", "┏", "┣", "┗", "┓", "┫", "┛"])] + [" "] for _ in range(9)] + [[" "] * 11]
 
 # nouvelle_liste=[]
 # for i in range(9):
@@ -38,8 +38,6 @@ import random
 # print(nouvelle_liste)
 
 
-
-
 ## +  = intersection
 ## trait = couloir
 ## carre = chambre
@@ -49,45 +47,52 @@ import random
 ## maintenant dire a cote d'une chambre on peut avoir ca ou ca etc
 
 
-matrice=[[" "] * 11] + [[" "] + [x for _ in range(11) for x in random.choice(["⎾","⏤","⏋","O","|","+","⍈","┓","┊","┫","┣","⏊","┛","┗","⎿","⏌"," ","x"])] + [" "] for _ in range(9)] + [[" "] * 11]
+matrice = [[" "] * 11] + \
+          [[" "] + [x for _ in range(11) for x in random.choice(
+              ["⎾", "⏤", "⏋", "O", "|", "+", "⍈", "┓", "┊", "┫", "┣", "⏊", "┛", "┗", "⎿", "⏌", " ", "x"])
+                    ]
+           + [" "] for _ in range(9)] + \
+          [[" "] * 11]
 
-chambre=["⍈"]
-#chambre_random=["+","⏤", "⍈","┓","┫","┛","┗","┣","┏"]
-chambre_without_corner=["+","⏤", "⍈"]
+chambre = ["⍈"]
+# chambre_random=["+","⏤", "⍈","┓","┫","┛","┗","┣","┏"]
+chambre_without_corner = ["+", "⏤", "⍈"]
 chambre
-depart=["x"]
-depart_random=["⎿","⏌"]
-arrive=["O"]
-arrive_random=["|"]
-choix=[]
-choix2=[]
-choix3=[]
-new_line_chambre=[]
-new_line_depart=[]
-new_line_arrive=[]
+depart = ["x"]
+depart_random = ["⎿", "⏌"]
+arrive = ["O"]
+arrive_random = ["|"]
+choix = []
+choix2 = []
+choix3 = []
+new_line_chambre = []
+new_line_depart = []
+new_line_arrive = []
 for line in matrice:
-    for i in range(0,len(line)-1):
-        if line[i]==chambre[0]:
+    for i in range(0, len(line) - 1):
+        if line[i] == chambre[0]:
             # print("chambre")
-            choix=random.choice(chambre_without_corner)
+            choix = random.choice(chambre_without_corner)
             new_line_chambre.append(choix)
-        elif line[i]==depart[0]:
-            #print("depart")
-            choix2=random.choice(depart_random)
+        elif line[i] == depart[0]:
+            # print("depart")
+            choix2 = random.choice(depart_random)
             new_line_depart.append(choix2)
-        elif line[i]==arrive[0]:
-            #print("arrive")
-            choix3=random.choice(arrive_random)
+        elif line[i] == arrive[0]:
+            # print("arrive")
+            choix3 = random.choice(arrive_random)
             new_line_arrive.append(choix3)
         else:
             pass
-            #print("je suis dans le vide")
-    #print(line)
-print('new_line_chambre',new_line_chambre)
-print('new_line_depart',new_line_depart)
-print('new_line_arrive',new_line_arrive)
+            # print("je suis dans le vide")
+    # print(line)
+print('new_line_chambre', new_line_chambre)
+print('new_line_depart', new_line_depart)
+print('new_line_arrive', new_line_arrive)
 
-matrice_random=[[" "] * 11] + [[" "] + [x for _ in range(11) for x in random.choice([new_line_depart,new_line_chambre,new_line_arrive])] + [" "] for _ in range(9)] + [[" "] * 11]
+matrice_random = [[" "] * 11] + [
+    [" "] + [x for _ in range(11) for x in random.choice([new_line_depart, new_line_chambre, new_line_arrive])] + [" "]
+    for _ in range(9)] + [[" "] * 11]
 for line in matrice_random:
     print(line)
 

@@ -19,7 +19,7 @@ class Plateau:
                 if current_case != " ":
                     Plateau.dict_case_coords["{} {}".format(x, y)] = Case(x, y, current_case)
 
-                if current_case in ["┏", "⍈", "┏", "┣", "┗", "┓", "┫", "┛"]:
+                if current_case in ["┏", "⍈", "┏", "┣", "┗", "┓", "┫", "┛", "x", "O"]:
                     Plateau.dict_room_coords["{} {}".format(x, y)] = Room(x, y, current_case)
 
                 if current_case == "x":
@@ -67,34 +67,63 @@ class Plateau:
         Plateau.energy.pack()
 
         Plateau.canvas = Canvas(Plateau.main_frame,
-                                width=(len(Plateau.matrice[0])) * 50,
-                                height=(len(Plateau.matrice)) * 50,
+                                width=len(Plateau.matrice[0]) * 50,
+                                height=len(Plateau.matrice) * 25,
                                 bg="black", bd=0)
         Plateau.canvas.pack()
 
-        Plateau.console = Label(Plateau.main_frame)
+        Plateau.console = Label(Plateau.main_frame, bg="black", fg="white")
         Plateau.console.pack(side="left")
 
         Plateau.control_image = PhotoImage(file="control.gif")
         Plateau.control = Label(Plateau.main_frame, text="Controles", image=Plateau.control_image)
         Plateau.control.pack(side="right")
-        for case in Plateau.dict_case_coords:
-            Plateau.dict_case_coords[case].draw()
+        self.show_surroundings()
+        Plateau.root.bind_all("<Key>", self.move)
+
         Plateau.root.mainloop()
+
+    def move(self, event):
+        x = Plateau.player.x
+        y = Plateau.player.y
+        contour = {"z": {"coords": "{} {}".format(x, y - 1), "tuple": (x, y - 1)},
+                   "q": {"coords": "{} {}".format(x - 1, y), "tuple": (x - 1, y)},
+                   "s": {"coords": "{} {}".format(x, y + 1), "tuple": (x, y + 1)},
+                   "d": {"coords": "{} {}".format(x + 1, y), "tuple": (x + 1, y)}
+                   }
+        order = event.char
+        if order in contour:
+            if contour[event.char]["coords"] in Plateau.dict_case_coords:
+                Plateau.dict_case_coords[Plateau.player.coords].clear()
+                Plateau.player.move(contour[order]["tuple"][0], contour[order]["tuple"][1])
+                self.show_surroundings()
+
+        for key in [x["coords"] for x in contour.values()]:
+            if contour[order]["coords"] in Plateau.dict_room_coords:
+                Plateau.dict_room_coords[contour[key]["coords"]].contenu.signature()
 
     @staticmethod
     def _gen_basic():
-        return [[" ", " ", " ", " ", " ", " ", " ", " ", " "],
-                [" ", " ", "⎾", "⏤", "⏋", " ", "O", " ", " "],
-                [" ", " ", "|", " ", "|", " ", "|", " ", " "],
-                [" ", "┏", "+", "⍈", "+", "⍈", "+", "┓", " "],
-                [" ", "┊", "|", " ", "|", " ", "|", "┊", " "],
-                [" ", "┣", "+", "⍈", "+", "⍈", "+", "┫", " "],
-                [" ", "┊", "|", " ", "|", " ", "|", "┊", " "],
-                [" ", "┗", "+", "⍈", "+", "⍈", "⏊", "┛", " "],
-                [" ", " ", "|", " ", "|", " ", " ", " ", " "],
-                [" ", " ", "⎿", "x", "⏌", " ", " ", " ", " "],
-                [" ", " ", " ", " ", " ", " ", " ", " ", " "]]
+        return [[" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "],
+                [" ", " ", " ", "⎾", "⏤", "⏋", " ", "O", " ", " ", " "],
+                [" ", " ", " ", "|", " ", "|", " ", "|", " ", " ", " "],
+                [" ", "┏", "⏤", "+", "⍈", "+", "⍈", "+", "⏤", "┓", " "],
+                [" ", "┊", " ", "|", " ", "|", " ", "|", " ", "┊", " "],
+                [" ", "┣", "⏤", "+", "⍈", "+", "⍈", "+", "⏤", "┫", " "],
+                [" ", "┊", " ", "|", " ", "|", " ", "|", " ", "┊", " "],
+                [" ", "┗", "⏤", "+", "⍈", "+", "⍈", "⏊", "⏤", "┛", " "],
+                [" ", " ", " ", "|", " ", "|", " ", " ", " ", " ", " "],
+                [" ", " ", " ", "⎿", "x", "⏌", " ", " ", " ", " ", " "],
+                [" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "]]
+
+    @staticmethod
+    def show_surroundings():
+        Plateau.canvas.delete("all")
+        if Plateau.player.coords not in Plateau.dict_room_coords:
+            for surounding in Plateau.player.surrounding_coords:
+                if surounding in Plateau.dict_case_coords:
+                    Plateau.dict_case_coords[surounding].draw("gray22")
+        Plateau.dict_case_coords[Plateau.player.coords].draw()
 
     @staticmethod
     def _gen_random():
@@ -156,8 +185,9 @@ class Case:
         self.y = y
         self.coords = "{} {}".format(x, y)
         self.type = symbole
+        self.color = "white"
 
-    def draw(self):
+    def draw(self, color="white"):
         dict_drawings = {"⍈": self.t_h_room,
 
                          "x": self.reception,
@@ -195,81 +225,62 @@ class Case:
                          "O": self.porte
 
                          }
+        self.color = color
         dict_drawings[self.type]()
 
     def base_room(self):
-        x = self.x * 50
-        y = self.y * 50
-        Plateau.canvas.create_polygon(x + 22, y + 42,
-                                      x + 22, y + 40,
-                                      x + 10, y + 40,
-                                      x + 10, y + 28,
-                                      x + 8, y + 28,
-                                      x + 8, y + 42,
-                                      fill="white")
-
-        Plateau.canvas.create_polygon(x + 22, y + 8,
-                                      x + 22, y + 10,
-                                      x + 10, y + 10,
-                                      x + 10, y + 22,
-                                      x + 8, y + 22,
-                                      x + 8, y + 8,
-                                      fill="white")
-        Plateau.canvas.create_polygon(x + 28, y + 42,
-                                      x + 42, y + 42,
-                                      x + 42, y + 28,
-                                      x + 40, y + 28,
-                                      x + 40, y + 40,
-                                      x + 28, y + 40,
-                                      fill="white")
-        Plateau.canvas.create_polygon(x + 28, y + 8,
-                                      x + 28, y + 10,
-                                      x + 40, y + 10,
-                                      x + 40, y + 22,
-                                      x + 42, y + 22,
-                                      x + 42, y + 8,
-                                      fill="white")
+        x = self.x * 50 + 25
+        y = self.y * 25 + 12.5
+        for x_sign in (1, -1):
+            for y_sign in (1, -1):
+                Plateau.canvas.create_polygon(x + x_sign * 3, y + y_sign * 17,
+                                              x + x_sign * 3, y + y_sign * 15,
+                                              x + x_sign * 15, y + y_sign * 15,
+                                              x + x_sign * 15, y + y_sign * 3,
+                                              x + x_sign * 17, y + y_sign * 3,
+                                              x + x_sign * 17, y + y_sign * 17,
+                                              fill=self.color, tags=self.coords)
 
     def h_wall(self, top: bool):
         diff = 32 if top else 0
         x = self.x * 50
-        y = self.y * 50
+        y = self.y * 25 - 12.5
         Plateau.canvas.create_polygon(x + 22, y + 42 - diff,
                                       x + 28, y + 42 - diff,
                                       x + 28, y + 40 - diff,
                                       x + 22, y + 40 - diff,
-                                      fill="white")
+                                      fill=self.color, tags=self.coords)
 
     def v_wall(self, left: bool):
         diff = 32 if left else 0
         x = self.x * 50
-        y = self.y * 50
+        y = self.y * 25 - 12.5
         Plateau.canvas.create_polygon(x + 42 - diff, y + 28,
                                       x + 42 - diff, y + 22,
                                       x + 40 - diff, y + 22,
                                       x + 40 - diff, y + 28,
-                                      fill="white")
+                                      fill=self.color, tags=self.coords)
 
     def h_door(self, top: bool):
         diff = -1 if top else 1
 
         x = self.x * 50
-        y = self.y * 50
-        Plateau.canvas.create_polygon(x + 20, y + 25 + diff * 25,
-                                      x + 20, y + 25 + diff * 17,
-                                      x + 30, y + 25 + diff * 17,
-                                      x + 30, y + 25 + diff * 25,
-                                      x + 28, y + 25 + diff * 25,
-                                      x + 28, y + 25 + diff * 18,
-                                      x + 22, y + 25 + diff * 18,
-                                      x + 22, y + 25 + diff * 25,
-                                      fill="white")
+        y = self.y * 25 + 12.5
+        Plateau.canvas.create_polygon(x + 20, y + diff * 25,
+                                      x + 20, y + diff * 17,
+                                      x + 30, y + diff * 17,
+                                      x + 30, y + diff * 25,
+                                      x + 28, y + diff * 25,
+                                      x + 28, y + diff * 18,
+                                      x + 22, y + diff * 18,
+                                      x + 22, y + diff * 25,
+                                      fill=self.color, tags=self.coords)
 
     def v_door(self, left: bool):
         diff = -1 if left else 1
 
         x = self.x * 50
-        y = self.y * 50
+        y = self.y * 25 - 12.5
         Plateau.canvas.create_polygon(x + 25 + diff * 25, y + 20,
                                       x + 25 + diff * 17, y + 20,
                                       x + 25 + diff * 17, y + 30,
@@ -278,7 +289,7 @@ class Case:
                                       x + 25 + diff * 18, y + 28,
                                       x + 25 + diff * 18, y + 22,
                                       x + 25 + diff * 25, y + 22,
-                                      fill="white")
+                                      fill=self.color, tags=self.coords)
 
     def t_h_room(self):
         self.base_room()
@@ -290,7 +301,7 @@ class Case:
     def reception(self):
         self.t_h_room()
 
-        Plateau.canvas.create_text(self.x * 50 + 25, self.y * 50 + 25, text="R", fill="white")
+        Plateau.canvas.create_text(self.x * 50 + 25, self.y * 25 + 12.5, text="R", fill=self.color, tags=self.coords)
 
     def c_tl_room(self):
         self.base_room()
@@ -334,57 +345,46 @@ class Case:
         self.h_door(top=False)
         self.v_door(left=True)
 
-    def tri_b_corridor(self):
-        pass
-
     def v_corridor(self):
-        x = self.x * 50
-        y = self.y * 50
-        Plateau.canvas.create_polygon(x + 20, y + 50,
-                                      x + 20, y + 00,
-                                      x + 22, y + 00,
-                                      x + 22, y + 50,
-                                      fill="white")
-        Plateau.canvas.create_polygon(x + 30, y + 50,
-                                      x + 30, y + 00,
-                                      x + 28, y + 00,
-                                      x + 28, y + 50,
-                                      fill="white")
+        x = self.x * 50 + 25
+        y = self.y * 25 + 6.25
+        for diff in [1, -1]:
+            Plateau.canvas.create_polygon(x + diff * 5, y + 12.5,
+                                          x + diff * 5, y + 00,
+                                          x + diff * 3, y + 00,
+                                          x + diff * 3, y + 12.5,
+                                          fill=self.color, tags=self.coords)
 
     def h_corridor(self):
         x = self.x * 50
-        y = self.y * 50
-        Plateau.canvas.create_polygon(x + 50, y + 20,
-                                      x + 0, y + 22,
-                                      x + 0, y + 20,
-                                      x + 50, y + 22,
-                                      fill="white")
-        # Plateau.canvas.create_polygon(x + 50, y + 30,
-        #                               x + 00, y + 30,
-        #                               x + 00, y + 28,
-        #                               x + 50, y + 28,
-        #                               fill="white")
+        y = self.y * 25 + 12.5
+        for diff in [1, -1]:
+            Plateau.canvas.create_polygon(x + 50, y + diff * 5,
+                                          x + 00, y + diff * 5,
+                                          x + 00, y + diff * 3,
+                                          x + 50, y + diff * 3,
+                                          fill=self.color, tags=self.coords)
 
     def corner_corridor(self, left: bool, top: bool):
         l = 1 if left else -1
         t = 1 if top else -1
 
         x = self.x * 50 + 25
-        y = self.y * 50 + 25
+        y = self.y * 25 + 12.5
         Plateau.canvas.create_polygon(x + l * 3, y + t * 25,
                                       x + l * 5, y + t * 25,
                                       x + l * 5, y + t * 5,
                                       x + l * 25, y + t * 5,
                                       x + l * 25, y + t * 3,
                                       x + l * 3, y + t * 3,
-                                      fill="white")
+                                      fill=self.color, tags=self.coords)
         Plateau.canvas.create_polygon(x + l * -3, y + t * 25,
                                       x + l * -5, y + t * 25,
                                       x + l * -5, y + t * -5,
                                       x + l * 25, y + t * -5,
                                       x + l * 25, y + t * -3,
                                       x + l * -3, y + t * -3,
-                                      fill="white")
+                                      fill=self.color, tags=self.coords)
 
     def c_bl_corridor(self):
         self.corner_corridor(top=False, left=True)
@@ -399,40 +399,34 @@ class Case:
         self.corner_corridor(top=True, left=False)
 
     def cross_section(self):
-        x = self.x * 50
-        y = self.y * 50
-        Plateau.canvas.create_polygon(x + 20, y + 50,
-                                      x + 20, y + 30,
-                                      x + 00, y + 30,
-                                      x + 00, y + 28,
-                                      x + 22, y + 28,
-                                      x + 22, y + 50,
-                                      fill="white")
+        x = self.x * 50 + 25
+        y = self.y * 25 + 12.5
+        for x_sign in (1, -1):
+            for y_sign in (1, -1):
+                Plateau.canvas.create_polygon(x + x_sign * 3, y + y_sign * 25,
+                                              x + x_sign * 3, y + y_sign * 3,
+                                              x + x_sign * 25, y + y_sign * 3,
+                                              x + x_sign * 25, y + y_sign * 5,
+                                              x + x_sign * 5, y + y_sign * 5,
+                                              x + x_sign * 5, y + y_sign * 25,
+                                              fill=self.color, tags=self.coords)
 
-        Plateau.canvas.create_polygon(x + 00, y + 22,
-                                      x + 00, y + 20,
-                                      x + 20, y + 20,
-                                      x + 20, y + 00,
-                                      x + 22, y + 00,
-                                      x + 22, y + 22,
-                                      fill="white")
-
-        Plateau.canvas.create_polygon(x + 30, y + 50,
-                                      x + 30, y + 30,
-                                      x + 50, y + 30,
-                                      x + 50, y + 28,
-                                      x + 28, y + 28,
-                                      x + 28, y + 50,
-                                      fill="white")
-
-        Plateau.canvas.create_polygon(x + 50, y + 22,
-                                      x + 50, y + 20,
-                                      x + 30, y + 20,
-                                      x + 30, y + 00,
-                                      x + 28, y + 00,
-                                      x + 28, y + 22,
-
-                                      fill="white")
+    def tri_b_corridor(self):
+        x = self.x * 50 + 25
+        y = self.y * 25 + 12.5
+        Plateau.canvas.create_polygon(x + 25, y + 5,
+                                      x - 25, y + 5,
+                                      x - 25, y + 3,
+                                      x + 25, y + 3,
+                                      fill=self.color, tags=self.coords)
+        for sign in [1, -1]:
+            Plateau.canvas.create_polygon(x + sign * 3, y - 25,
+                                          x + sign * 3, y - 3,
+                                          x + sign * 25, y - 3,
+                                          x + sign * 25, y - 5,
+                                          x + sign * 5, y - 5,
+                                          x + sign * 5, y - 25,
+                                          fill=self.color, tags=self.coords)
 
     def porte(self):
         self.base_room()
@@ -440,6 +434,12 @@ class Case:
         self.v_wall(left=True)
         self.v_wall(left=False)
         self.h_door(top=False)
+
+    def change_color(self, new_color):
+        Plateau.canvas.itemconfig(self.coords, fill=new_color)
+
+    def clear(self):
+        Plateau.canvas.delete(self.coords)
 
 
 class Contenu:
@@ -466,7 +466,7 @@ class Enemy(Contenu):
 
 class LandLord(Enemy):
     def signature(self):
-        pass
+        Plateau.console["text"] = "Cling cling"
 
     def effect(self):
         Plateau.player.move(Plateau.reception.x, Plateau.reception.y)
@@ -519,11 +519,19 @@ class Player:
         self.y = Plateau.reception.y
         self.coords = "{} {}".format(self.x, self.y)
         self.energy = 3
+        self.surrounding_coords = ["{} {}".format(self.x, self.y - 1),
+                                   "{} {}".format(self.x - 1, self.y),
+                                   "{} {}".format(self.x, self.y + 1),
+                                   "{} {}".format(self.x + 1, self.y)]
 
-    def move(self, x, y):
-        self.x = x
-        self.y = y
+    def move(self, x=None, y=None):
+        self.x = x if x else self.x
+        self.y = y if y else self.y
         self.coords = "{} {}".format(self.x, self.y)
+        self.surrounding_coords = ["{} {}".format(self.x, self.y - 1),
+                                   "{} {}".format(self.x - 1, self.y),
+                                   "{} {}".format(self.x, self.y + 1),
+                                   "{} {}".format(self.x + 1, self.y)]
 
 
 if __name__ == "__main__":
