@@ -1,5 +1,6 @@
 from tkinter import *
 import random as rd
+import time
 
 
 class Plateau:
@@ -19,7 +20,7 @@ class Plateau:
                 if current_case != " ":
                     Plateau.dict_case_coords["{} {}".format(x, y)] = Case(x, y, current_case)
 
-                if current_case in ["┏", "⍈", "┏", "┣", "┗", "┓", "┫", "┛", "x", "O"]:
+                if current_case in ["┏", "⍈", "┏", "┣", "┗", "┓", "┫", "┛"]:
                     Plateau.dict_room_coords["{} {}".format(x, y)] = Room(x, y, current_case)
 
                 if current_case == "x":
@@ -75,15 +76,17 @@ class Plateau:
         Plateau.console = Label(Plateau.main_frame, bg="black", fg="white")
         Plateau.console.pack(side="left")
 
-        Plateau.control_image = PhotoImage(file="control.gif")
-        Plateau.control = Label(Plateau.main_frame, text="Controles", image=Plateau.control_image)
-        Plateau.control.pack(side="right")
+        control_image = PhotoImage(file="control.gif")
+        control = Label(Plateau.main_frame, text="Controles", image=control_image)
+        control.pack(side="right")
+
         self.show_surroundings()
         Plateau.root.bind_all("<Key>", self.move)
 
         Plateau.root.mainloop()
 
-    def move(self, event):
+    @staticmethod
+    def move(event):
         x = Plateau.player.x
         y = Plateau.player.y
         contour = {"z": {"coords": "{} {}".format(x, y - 1), "tuple": (x, y - 1)},
@@ -92,15 +95,28 @@ class Plateau:
                    "d": {"coords": "{} {}".format(x + 1, y), "tuple": (x + 1, y)}
                    }
         order = event.char
+        Plateau.console["text"] = ""
+
         if order in contour:
             if contour[event.char]["coords"] in Plateau.dict_case_coords:
                 Plateau.dict_case_coords[Plateau.player.coords].clear()
                 Plateau.player.move(contour[order]["tuple"][0], contour[order]["tuple"][1])
-                self.show_surroundings()
+                Plateau.show_surroundings()
 
-        for key in [x["coords"] for x in contour.values()]:
-            if contour[order]["coords"] in Plateau.dict_room_coords:
-                Plateau.dict_room_coords[contour[key]["coords"]].contenu.signature()
+        for key in Plateau.player.surrounding_coords:
+            if key in Plateau.dict_room_coords:
+                Plateau.dict_room_coords[key].contenu.signature()
+
+        if Plateau.player.coords in Plateau.dict_room_coords:
+            Plateau.dict_room_coords[Plateau.player.coords].contenu.effect()
+            Plateau.show_surroundings()
+            if Plateau.player.energy <= 0:
+                Plateau.loose()
+
+        if Plateau.player.coords == Plateau.porte.coords:
+            Plateau.win()
+
+        Plateau.energy["text"] = "{} pintes d'énergies".format(Plateau.player.energy)
 
     @staticmethod
     def _gen_basic():
@@ -176,11 +192,13 @@ class Plateau:
 
     @staticmethod
     def win():
-        pass
+        Plateau.console["text"] = "Félicitations, vous êtes arrivés à la porte du Paradis !"
+        Plateau.root.bind_all("<Key>", exit)
 
     @staticmethod
     def loose():
-        pass
+        Plateau.console["text"] = "Tu n'as plus d'énergie et tu errera désormais à jamais dans les limbes"
+        Plateau.root.bind_all("<Key>", exit)
 
 
 class Case:
@@ -470,7 +488,7 @@ class Enemy(Contenu):
 
 class LandLord(Enemy):
     def signature(self):
-        Plateau.console["text"] = "Cling cling"
+        Plateau.console["text"] += "Cling cling\n"
 
     def effect(self):
         Plateau.player.move(Plateau.reception.x, Plateau.reception.y)
@@ -481,9 +499,10 @@ class LandLord(Enemy):
 
 class MadScientist(Enemy):
     def signature(self):
-        print("Mwah ah ah ah !")
+        Plateau.console["text"] += "Mwah ah ah !\n"
 
     def effect(self):
+        Affiche("Mad_Scientist.gif", "Tu es téléporté dans une salle aléatoire et tu perd 1 énergie")
         Plateau.player.energy -= 1
         chosen_case = Plateau.dict_case_coords[rd.choice(list(Plateau.dict_case_coords))]
         Plateau.player.move(chosen_case.x, chosen_case.y)
@@ -494,13 +513,32 @@ class MadScientist(Enemy):
 
 class Bibendum(Enemy):
     def signature(self):
-        pass
+        Plateau.console["text"] += "Ça sent bon par ici !\n"
 
     def effect(self):
+        Affiche("bibendum.gif", "Vous êtes paralysés et perdez 2 énergies")
         Plateau.player.energy -= 2
 
     def __repr__(self):
         return "Bibbendum"
+
+
+class Affiche:
+    def __init__(self, file, text):
+        self.affiche = Toplevel(Plateau.root)
+        self.frame = Frame(self.affiche, bg="black")
+        self.frame.pack()
+        self.image = PhotoImage(file=file)
+
+        self.image_label = Label(self.frame, image=self.image)
+        self.image_label.pack()
+        self.label = Label(self.frame, bg="black", fg="white", text=text)
+        self.label.pack()
+        Plateau.root.bind_all("<Key>", self._close)
+
+    def _close(self, event):
+        self.affiche.destroy()
+        Plateau.root.bind_all("<Key>", Plateau.move)
 
 
 class Energy(Contenu):
@@ -511,9 +549,10 @@ class Energy(Contenu):
         return "{} pintes vertes d'énergie".format(self.amount)
 
     def effect(self):
-        print("Vous avez trouver {} pintes d'ectoplasme vert".format(self.amount))
-        Plateau.player.energy += self.amount
-        self.amount = 0
+        if self.amount:
+            Plateau.console["text"] = "Vous avez trouver {} pintes d'ectoplasme vert".format(self.amount)
+            Plateau.player.energy += self.amount
+            self.amount = 0
 
 
 class Player:
@@ -539,4 +578,4 @@ class Player:
 
 
 if __name__ == "__main__":
-    Plateau._gen_random()
+    Plateau()
