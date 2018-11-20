@@ -125,6 +125,10 @@ class Plateau:
                     Plateau.dict_case_coords[surounding].draw("gray22")
         Plateau.dict_case_coords[Plateau.player.coords].draw()
 
+    def show_map(self):
+        for case in Plateau.dict_case_coords:
+            Plateau.dict_case_coords[case].draw()
+
     @staticmethod
     def _gen_random():
         pass
@@ -535,4 +539,4 @@ class Player:
 
 
 if __name__ == "__main__":
-    print(Plateau())
+    Plateau._gen_random()
