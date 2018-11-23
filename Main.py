@@ -1,33 +1,37 @@
 import random as rd
 
 
-class Plateau:
-    """ Cette fonction permet de construire la matrice
-    de configuerer les coordonnées de chaque éléments de la matrice mais aussi su joueur """
+class Game:
+    """Classe regroupant l'ensemble des fonctionnalités du jeu
+        Contrôles:
+            z  ==> Aller en haut
+            q  ==> Aller à gauche
+            s  ==> Aller en bas
+            d  ==> Aller à droite"""
 
     matrice = reception = porte = player = None
     dict_room_coords = {}
     dict_case_coords = {}
 
     def __init__(self, basic: bool = True):
-        """ Cette fontion initaialise le plateau le jeu """
-        """ Elle permet egalement de choisir la generation basique ou random """
+        """ Cette fonction initialise le plateau le jeu
+            Elle permet également de choisir la generation basique ou random """
 
-        Plateau.matrice = Plateau._gen_basic() if basic else Plateau._gen_random()
-        for y in range(len(Plateau.matrice)):
-            for x in range(len(Plateau.matrice[y])):
-                current_case = Plateau.matrice[y][x]
+        Game.matrice = Game._gen_basic() if basic else Game._gen_random()
+        for y in range(len(Game.matrice)):
+            for x in range(len(Game.matrice[y])):
+                current_case = Game.matrice[y][x]
                 if current_case != " ":
-                    Plateau.dict_case_coords["{} {}".format(x, y)] = Case(x, y, current_case)
+                    Game.dict_case_coords["{} {}".format(x, y)] = Case(x, y, current_case)
 
                 if current_case in ["┏", "⍈", "┏", "┣", "┗", "┓", "┫", "┛"]:
-                    Plateau.dict_room_coords["{} {}".format(x, y)] = Room(x, y, current_case)
+                    Game.dict_room_coords["{} {}".format(x, y)] = Room(x, y, current_case)
 
                 if current_case == "x":
-                    Plateau.reception = Room(x, y, current_case)
+                    Game.reception = Room(x, y, current_case)
 
                 elif current_case == "O":
-                    Plateau.porte = Room(x, y, current_case)
+                    Game.porte = Room(x, y, current_case)
 
         total_pinte = 5
         liste_pinte = []
@@ -36,26 +40,26 @@ class Plateau:
             liste_pinte.append(new_amount)
             total_pinte -= new_amount
 
-        list_filled_room_coords = rd.sample(list(Plateau.dict_room_coords), 5 + len(liste_pinte))
+        list_filled_room_coords = rd.sample(list(Game.dict_room_coords), 5 + len(liste_pinte))
 
-        Plateau.dict_room_coords[list_filled_room_coords[0]].contenu = LandLord()
+        Game.dict_room_coords[list_filled_room_coords[0]].contenu = LandLord()
 
-        Plateau.dict_room_coords[list_filled_room_coords[1]].contenu = MadScientist()
+        Game.dict_room_coords[list_filled_room_coords[1]].contenu = MadScientist()
 
         for enemy_room in list_filled_room_coords[2:5]:
-            Plateau.dict_room_coords[enemy_room].contenu = Bibendum()
+            Game.dict_room_coords[enemy_room].contenu = Bibendum()
 
         n = 0
         for pinte_room in list_filled_room_coords[5:]:
-            Plateau.dict_room_coords[pinte_room].contenu = Energy(liste_pinte[n])
+            Game.dict_room_coords[pinte_room].contenu = Energy(liste_pinte[n])
             n += 1
 
-        Plateau.player = Player()
+        Game.player = Player()
         self.turn()
 
     @staticmethod
     def _gen_basic():
-        """ plateau de jeu pour la version basique """
+        """Génère la matrice map basique telle que montrée dans le sujet"""
 
         return [[" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "],
                 [" ", " ", " ", "⎾", "⏤", "⏋", " ", "O", " ", " ", " "],
@@ -71,17 +75,17 @@ class Plateau:
 
     @staticmethod
     def _gen_random():
-        """ définit une map aléatoirement """
+        """ Génère la matrice map aléatoirement """
         pass
 
     def __repr__(self):
-        """ pour chaque ligne de la matrice, on effectue un retour à la ligne """
-        return "\n".join(["".join(line) for line in Plateau.matrice])
+        """Permet d'afficher correctement la matrice"""
+        return "\n".join(["".join(line) for line in Game.matrice])
 
     def turn(self):
-        """ définit les coordonnées du joueur sur le plateau """
-        x = Plateau.player.x
-        y = Plateau.player.y
+        """Définit le déroulement de chaque tour du jeu"""
+        x = Game.player.x
+        y = Game.player.y
         keys = {}
 
         contour = {"z": {"coords": "{} {}".format(x, y - 1), "tuple": (x, y - 1)},
@@ -91,24 +95,24 @@ class Plateau:
                    }
 
         for key in contour:
-            if contour[key]["coords"] in Plateau.dict_case_coords:
+            if contour[key]["coords"] in Game.dict_case_coords:
                 keys[key] = contour[key]["tuple"]
-                if contour[key]["coords"] in Plateau.dict_room_coords:
-                    Plateau.dict_room_coords[contour[key]["coords"]].contenu.signature()
+                if contour[key]["coords"] in Game.dict_room_coords:
+                    Game.dict_room_coords[contour[key]["coords"]].contenu.signature()
 
-        print(Plateau.dict_case_coords[Plateau.player.coords])
+        print(Game.dict_case_coords[Game.player.coords])
         order = input()
 
         if order in keys:
-            Plateau.player.move(keys[order][0], keys[order][1])
+            Game.player.move(keys[order][0], keys[order][1])
 
-            if Plateau.player.coords in Plateau.dict_room_coords:
-                Plateau.dict_room_coords[Plateau.player.coords].contenu.effect()
+            if Game.player.coords in Game.dict_room_coords:
+                Game.dict_room_coords[Game.player.coords].contenu.effect()
 
-                if Plateau.player.energy <= 0:
+                if Game.player.energy <= 0:
                     self.loose()
 
-            if Plateau.player.coords == Plateau.porte.coords:
+            if Game.player.coords == Game.porte.coords:
                 self.win()
 
             self.turn()
@@ -117,9 +121,9 @@ class Plateau:
             print("Tu ne peut pas aller par là")
             self.turn()
 
-    @staticmethod  """ methode fixe """
+    @staticmethod  # Fonction n'ayant pas besoin de l'instance de l'objet pour fonctionner
     def win():
-        """ Cette fonction montre cette illustration quand le joueur gagne """
+        """ Cette fonction affiche cette illustration quand le joueur gagne """
         print("                                                   .-')                 ",
               "                                                  /   |                 ",
               "                                                .' /  F                 ",
@@ -179,7 +183,7 @@ class Plateau:
 
     @staticmethod
     def loose():
-        """ Cette fonction montre cette illustration quand le joueur perd """
+        """ Cette fonction affiche cette illustration quand le joueur perd """
         print("                   _.-, ",
               "              _ .-'  / .._",
               "           .-:'/ - - \:::::-.",
@@ -207,27 +211,27 @@ class Case:
     dict_repr = {"⍈": "               \n" +
                       "  ┏━━━━━━━━━┓  \n" +
                       " ┯┛         ┗┯ \n" +
-                      " ┷┓     o   ┏┷ \n" +
+                      " ┷┓         ┏┷ \n" +
                       "  ┗━━━━━━━━━┛  \n" +
                       "               \n",
 
                  "x": "               \n" +
                       "  ┏━━━━━━━━━┓  \n" +
                       " ┯┛         ┗┯ \n" +
-                      " ┷┓   o     ┏┷ \n" +
+                      " ┷┓         ┏┷ \n" +
                       "  ┗━━━━━━━━━┛  \n" +
                       "               \n",
 
                  "┏": "               \n" +
                       "  ┏━━━━━━━━━┓  \n" +
                       "  ┃         ┗┯ \n" +
-                      "  ┃      o  ┏┷ \n" +
+                      "  ┃         ┏┷ \n" +
                       "  ┗━━━┓ ┏━━━┛  \n" +
                       "      ┠─┨      \n",
 
                  "┣": "      ┠─┨      \n" +
                       "  ┏━━━┛ ┗━━━┓  \n" +
-                      "  ┃       o ┗┯ \n" +
+                      "  ┃         ┗┯ \n" +
                       "  ┃         ┏┷ \n" +
                       "  ┗━━━┓ ┏━━━┛  \n" +
                       "      ┠─┨      \n",
@@ -235,20 +239,20 @@ class Case:
                  "┗": "      ┠─┨      \n" +
                       "  ┏━━━┛ ┗━━━┓  \n" +
                       "  ┃         ┗┯ \n" +
-                      "  ┃  o      ┏┷ \n" +
+                      "  ┃         ┏┷ \n" +
                       "  ┗━━━━━━━━━┛  \n" +
                       "               \n",
 
                  "┓": "               \n" +
                       "  ┏━━━━━━━━━┓  \n" +
-                      " ┯┛    o    ┃  \n" +
+                      " ┯┛         ┃  \n" +
                       " ┷┓         ┃  \n" +
                       "  ┗━━━┓ ┏━━━┛  \n" +
                       "      ┠─┨      \n",
 
                  "┫": "      ┠─┨      \n" +
                       "  ┏━━━┛ ┗━━━┓  \n" +
-                      " ┯┛     o   ┃  \n" +
+                      " ┯┛         ┃  \n" +
                       " ┷┓         ┃  \n" +
                       "  ┗━━━┓ ┏━━━┛  \n" +
                       "      ┠─┨      \n",
@@ -256,13 +260,13 @@ class Case:
                  "┛": "      ┠─┨      \n" +
                       "  ┏━━━┛ ┗━━━┓  \n" +
                       " ┯┛         ┃  \n" +
-                      " ┷┓      o  ┃  \n" +
+                      " ┷┓         ┃  \n" +
                       "  ┗━━━━━━━━━┛  \n" +
                       "               \n",
 
                  "┊": "      ┠─┨      \n" +
                       "      ┃ ┃      \n" +
-                      "      ┃o┃      \n" +
+                      "      ┃ ┃      \n" +
                       "      ┃ ┃      \n" +
                       "      ┃ ┃      \n" +
                       "      ┠─┨      \n",
@@ -270,20 +274,20 @@ class Case:
                  "|": "      ┋ ┋      \n" +
                       "      ┃ ┃      \n" +
                       "      ┃ ┃      \n" +
-                      "      ┃o┃      \n" +
+                      "      ┃ ┃      \n" +
                       "      ┃ ┃      \n" +
                       "      ┋ ┋      \n",
 
                  "⎿": "      ┋ ┋      \n" +
                       "      ┃ ┃      \n" +
-                      "      ┃o┗━━━━━┯\n" +
+                      "      ┃ ┗━━━━━┯\n" +
                       "      ┗━━━━━━━┷\n" +
                       "               \n" +
                       "               \n",
 
                  "⏌": "      ┋ ┋      \n" +
                       "      ┃ ┃      \n" +
-                      "┯━━━━━┛o┃      \n" +
+                      "┯━━━━━┛ ┃      \n" +
                       "┷━━━━━━━┛      \n" +
                       "               \n" +
                       "               \n",
@@ -291,22 +295,22 @@ class Case:
                  "+": "      ┋ ┋      \n" +
                       "      ┃ ┃      \n" +
                       "┯━━━━━┛ ┗━━━━━┯\n" +
-                      "┷━━━━━┓o┏━━━━━┷\n" +
+                      "┷━━━━━┓ ┏━━━━━┷\n" +
                       "      ┃ ┃      \n" +
                       "      ┋ ┋      \n",
 
                  "⎾": "               \n" +
                       "               \n" +
                       "      ┏━━━━━━━┉\n" +
-                      "      ┃o┏━━━━━┉\n" +
+                      "      ┃ ┏━━━━━┉\n" +
                       "      ┃ ┃      \n" +
                       "      ┋ ┋      \n",
 
                  "⏤": "               \n" +
                       "               \n" +
                       "┉━━━━━━━━━━━━━┉\n" +
-                      "┉━━━┓ o ┏━━━━━┉\n" +
-                      "    ┗━━━┛      \n" +
+                      "┉━━━━━━━━━━━━━┉\n" +
+                      "               \n" +
                       "               \n",
 
                  "⏋": "               \n" +
@@ -325,49 +329,79 @@ class Case:
                  }
 
     def __init__(self, x, y, symbole):
-        """ Cette fonction récupère les coordonnées pour chaque salle sur le plateau de jeu """
+        """Initialise chaque instance de case par ses coordonnées et son type définit par la matrice"""
         self.x = x
         self.y = y
         self.coords = "{} {}".format(x, y)
         self.type = symbole
 
     def __repr__(self):
-        """ recupere le type de piece, si c'est un couloir, porte ....  """
+        """Affiche la salle selon son type"""
         return Case.dict_repr[self.type]
 
 
 class Contenu:
-    """ je sais pas """
+    """Classe mère de tous ce que peut contenir une salle"""
     def __repr__(self):
         return "Salle vide"
 
     def effect(self):
+        """Effet invoqué quand le joueur se trouve dans la pièce contenant l'énergie"""
         pass
 
     def signature(self):
+        """Signature de l'ennemi invoqué quand le joueur se trouve autour de la pièce contenant l'ennemi
+            Permet ici de ne rien faire quand le contenu n'est pas spéciale"""
         pass
 
 
 class Room(Case):
-    """ cette fonctin sert à recupere les coordonnée de la room """
+    """Classe spécialisant les cases en pièces par la définition d'un contenu"""
     def __init__(self, x, y, symbole, contenu=Contenu()):
         super(Room, self).__init__(x, y, symbole)
         self.contenu = contenu
-        Plateau.dict_case_coords["{} {}".format(x, y)] = self
+
+
+class Energy(Contenu):
+    """Classe définissant l'effet des salles contenant de l'énergie"""
+    def __init__(self, amount):
+        """Initialise le contenue en énergie par le nombre d'énergie qu'elle contient"""
+        self.amount = amount
+
+    def __repr__(self):
+        return "{} pintes vertes d'énergie".format(self.amount)
+
+    def effect(self):
+        """Effet invoqué quand le joueur se trouve dans la pièce contenant l'énergie"""
+        print(
+            "           _",
+            "        ,-'  `-._",
+            "       |=========|",
+            "       (         )",
+            "        | !!    |",
+            "        | !!    |",
+            "        |       |",
+            "        |       |",
+            "        `======='",
+            sep="\n")
+        print("Vous avez trouver {} pintes d'ectoplasme vert".format(self.amount))
+        Game.player.energy += self.amount
+        self.amount = 0
 
 
 class Enemy(Contenu):
+    """Classe définissant les ennemis comme un contenu de salle"""
     pass
 
 
 class LandLord(Enemy):
-    """ cette fonction regroupe le message du LandLord, et l'effet qu'il procure sur le joueur """
+    """Classe d'ennemie: Le Maître du Chateau"""
     def signature(self):
-        """ message que le joueur percoit """
+        """Signature du Maître du Chateau perçue quand le joueur se trouve autour de la pièce le contenant"""
         print("Cling Cling !")
 
     def effect(self):
-        """ effet de l'ennemie sur le joueur """
+        """Effet invoqué quand le joueur se trouve dans la pièce contenant le Maître du Chateau"""
         print("                               _________",
               "                              [_________]",
               "                      ,,,,,      _|//",
@@ -395,20 +429,20 @@ class LandLord(Enemy):
               "Retourne donc à la Réception mon très cher Gasper !",
               sep="\n")
         input()
-        Plateau.player.move(Plateau.reception.x, Plateau.reception.y)
+        Game.player.move(Game.reception.x, Game.reception.y)
 
     def __repr__(self):
         return "LandLord"
 
 
 class MadScientist(Enemy):
-    """ cette fonction regroupe le message du MadScientist, et l'effet qu'il procure sur le joueur """
+    """Classe d'ennemie: Le Scientifique Fou"""
     def signature(self):
-        """ message que le joueur percoit """
+        """Signature du Scientifique Fou perçue quand le joueur se trouve autour de la pièce le contenant"""
         print("Mwah ah ah ah !")
 
     def effect(self):
-        """ effet de l'ennemie sur le joueur """
+        """Effet invoqué quand le joueur se trouve dans la pièce contenant le Scientifique Fou"""
         print(
             "                                            . ",
             "                        .   \\ \\ / \\ \\|   \\ | / /  ,",
@@ -444,9 +478,9 @@ class MadScientist(Enemy):
             "        `---'                                            `---'",
             sep="\n")
         print("Dans sa fureur, il vous téléporte dans une salle aléatoire !")
-        Plateau.player.energy -= 1
-        chosen_case = Plateau.dict_case_coords[rd.choice(list(Plateau.dict_case_coords))]
-        Plateau.player.move(chosen_case.x, chosen_case.y)
+        Game.player.energy -= 1
+        chosen_case = Game.dict_case_coords[rd.choice(list(Game.dict_case_coords))]
+        Game.player.move(chosen_case.x, chosen_case.y)
 
         print("Le bougre en a profiter pour vous subtiliser une pinte d'énergie ...")
         input()
@@ -456,13 +490,13 @@ class MadScientist(Enemy):
 
 
 class Bibendum(Enemy):
-    """ cette fonction regroupe le message du bibendum, et l'effet qu'il procure sur le joueur """
+    """Classe d'ennemi: Bibendum"""
     def signature(self):
-        """ message que le joueur percoit """
+        """Signature du Bibendum perçue quand le joueur se trouve autour de la pièce le contenant"""
         print("Ça sent bon par ici !")
 
     def effect(self):
-        """ effet de l'ennemie sur le joueur """
+        """Effet invoqué quand le joueur se trouve dans la pièce contenant le Bibendum"""
         print("     ,...._                          _,.._",
               "    (  \ \\\"b_.._                  _,d8P\"\"Y8o.",
               "    `8\ \ \ 8P\"8                 ,8\"  _    _Yb.",
@@ -516,54 +550,27 @@ class Bibendum(Enemy):
         input()
         input()
         print("vous perdez 2 d'énergie")
-        Plateau.player.energy -= 2
+        Game.player.energy -= 2
 
     def __repr__(self):
         return "Bibbendum"
 
 
-class Energy(Contenu):
-    """ cette fonction definit le compteur de pintes d'energie, et l'image associe à la pinte """
-    def __init__(self, amount):
-        """ compteur d'energie """
-        self.amount = amount
-
-    def __repr__(self):
-        return "{} pintes vertes d'énergie".format(self.amount)
-
-    def effect(self):
-        """ image montrant les pintes récupéré """
-        print(
-            "           _",
-            "        ,-'  `-._",
-            "       |=========|",
-            "       (         )",
-            "        | !!    |",
-            "        | !!    |",
-            "        |       |",
-            "        |       |",
-            "        `======='",
-            sep="\n")
-        print("Vous avez trouver {} pintes d'ectoplasme vert".format(self.amount))
-        Plateau.player.energy += self.amount
-        self.amount = 0
-
-
 class Player:
 
     def __init__(self):
-        """ definit les coordonnées de la case départ """
-        self.x = Plateau.reception.x
-        self.y = Plateau.reception.y
+        """Initialise la position du joueur"""
+        self.x = Game.reception.x
+        self.y = Game.reception.y
         self.coords = "{} {}".format(self.x, self.y)
         self.energy = 3
 
     def move(self, x, y):
-        """ cette fonction recupère les coordonnées propre au joueur """
+        """Permet au joueur de bouger au nouvelles coordonnées x y données"""
         self.x = x
         self.y = y
         self.coords = "{} {}".format(self.x, self.y)
 
 
 if __name__ == "__main__":
-    print(Plateau())
+    print(Game())
