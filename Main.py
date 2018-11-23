@@ -19,7 +19,8 @@ class Game:
 
         Game.matrice = Game._gen_basic() if basic else Game._gen_random()  # Récupère la matrice de jeu
 
-        for y in range(len(Game.matrice)):           # Pour chaque coordonnées sur la matrice
+        # Récupération des informations contenus dans la matrice #
+        for y in range(len(Game.matrice)):  # Pour chaque coordonnées sur la matrice
             for x in range(len(Game.matrice[y])):
 
                 current_case = Game.matrice[y][x]  # On récupère la case de la matrice définie par ses coordonnées
@@ -30,26 +31,28 @@ class Game:
                 if current_case in ["┏", "⍈", "┏", "┣", "┗", "┓", "┫", "┛"]:  # Si la case fait partie de cette liste
                     Game.dict_room_coords["{} {}".format(x, y)] = Room(x, y, current_case)  # Alors c'est une salle
 
-                if current_case == "x":
-                    Game.reception = Room(x, y, current_case)
+                if current_case == "x":  # Si la case correspond à la réception
+                    Game.reception = Room(x, y, current_case)  # On sauvegarde sa position
 
-                elif current_case == "O":
-                    Game.porte = Room(x, y, current_case)
+                elif current_case == "O":  # Si la case est la porte du paradis
+                    Game.porte = Room(x, y, current_case)  # On sauvegarde sa position
 
+        # Distribution des pintes d'énergies #
         total_pinte = 5
         liste_pinte = []
         while total_pinte != 0:
-            new_amount = rd.randint(1, 3 if total_pinte >= 3 else total_pinte)
+            new_amount = rd.randint(1, 3 if total_pinte >= 3 else total_pinte)  # Entre 1 et 3 pintes par salle maximum
             liste_pinte.append(new_amount)
             total_pinte -= new_amount
 
+        # Choix aléatoire des salles contenant quelque chose #
         list_filled_room_coords = rd.sample(list(Game.dict_room_coords), 5 + len(liste_pinte))
 
         Game.dict_room_coords[list_filled_room_coords[0]].contenu = LandLord()
 
         Game.dict_room_coords[list_filled_room_coords[1]].contenu = MadScientist()
 
-        for enemy_room in list_filled_room_coords[2:5]:
+        for enemy_room in list_filled_room_coords[2:5]:  # Localisation des 3 Bibendum
             Game.dict_room_coords[enemy_room].contenu = Bibendum()
 
         n = 0
@@ -57,8 +60,9 @@ class Game:
             Game.dict_room_coords[pinte_room].contenu = Energy(liste_pinte[n])
             n += 1
 
-        Game.player = Player()
-        self.turn()
+        # Fin de l'initialisation #
+        Game.player = Player()  # Placage du joueur à la réception
+        self.turn()  # Premier tour de jeu
 
     @staticmethod
     def _gen_basic():
@@ -99,14 +103,17 @@ class Game:
                    "d": {"coords": "{} {}".format(x + 1, y), "tuple": (x + 1, y)}
                    }
 
-        for key in contour:  # key est ici les différentes input possibles
-            if contour[key]["coords"] in Game.dict_case_coords:  # Si se qui se trouve autour du joueur est une case
+        for key in contour:  # key est ici les différentes input possibles: z, q, s, d
+
+            if contour[key]["coords"] in Game.dict_case_coords:  # Si ce qui se trouve autour du joueur est une case
                 keys[key] = contour[key]["tuple"]  # Alors le joueur peut s'y déplacer
+
                 if contour[key]["coords"] in Game.dict_room_coords:  # Et si c'est une salle
                     Game.dict_room_coords[contour[key]["coords"]].contenu.signature()  # On éxécute la signature de son contenu
 
         print(Game.dict_case_coords[Game.player.coords])  # Affiche la salle où se trouve le joueur
-        order = input()
+
+        order = input()  # Récupère l'ordre de mouvement du joueur
 
         if order in keys:  # Si l'ordre du joueur se trouve bien dans les possibilités définies plus tôt
             Game.player.move(keys[order][0], keys[order][1])  # Le joueur se déplace vers la direction souhaitée
@@ -347,6 +354,7 @@ class Case:
 
 class Contenu:
     """Classe mère de tous ce que peut contenir une salle"""
+
     def __repr__(self):
         return "Salle vide"
 
@@ -362,6 +370,7 @@ class Contenu:
 
 class Room(Case):
     """Classe spécialisant les cases en pièces par la définition d'un contenu"""
+
     def __init__(self, x, y, symbole, contenu=Contenu()):
         super(Room, self).__init__(x, y, symbole)
         self.contenu = contenu
@@ -369,6 +378,7 @@ class Room(Case):
 
 class Energy(Contenu):
     """Classe définissant l'effet des salles contenant de l'énergie"""
+
     def __init__(self, amount):
         """Initialise le contenue en énergie par le nombre d'énergie qu'elle contient"""
         self.amount = amount
@@ -401,6 +411,7 @@ class Enemy(Contenu):
 
 class LandLord(Enemy):
     """Classe d'ennemie: Le Maître du Chateau"""
+
     def signature(self):
         """Signature du Maître du Chateau perçue quand le joueur se trouve autour de la pièce le contenant"""
         print("Cling Cling !")
@@ -442,6 +453,7 @@ class LandLord(Enemy):
 
 class MadScientist(Enemy):
     """Classe d'ennemie: Le Scientifique Fou"""
+
     def signature(self):
         """Signature du Scientifique Fou perçue quand le joueur se trouve autour de la pièce le contenant"""
         print("Mwah ah ah ah !")
@@ -496,6 +508,7 @@ class MadScientist(Enemy):
 
 class Bibendum(Enemy):
     """Classe d'ennemi: Bibendum"""
+
     def signature(self):
         """Signature du Bibendum perçue quand le joueur se trouve autour de la pièce le contenant"""
         print("Ça sent bon par ici !")
@@ -578,4 +591,4 @@ class Player:
 
 
 if __name__ == "__main__":
-    print(Game())
+    game = Game()
