@@ -84,9 +84,11 @@ class Game:
 
     def turn(self):
         """Définit le déroulement de chaque tour du jeu"""
+        # Récupération des coordonnées du joueur
         x = Game.player.x
         y = Game.player.y
-        keys = {}
+
+        keys = {}  # Initialise le dictionnaire contenant les mouvements possibles du joueur à chaque tour
 
         contour = {"z": {"coords": "{} {}".format(x, y - 1), "tuple": (x, y - 1)},
                    "q": {"coords": "{} {}".format(x - 1, y), "tuple": (x - 1, y)},
@@ -94,32 +96,32 @@ class Game:
                    "d": {"coords": "{} {}".format(x + 1, y), "tuple": (x + 1, y)}
                    }
 
-        for key in contour:
-            if contour[key]["coords"] in Game.dict_case_coords:
-                keys[key] = contour[key]["tuple"]
-                if contour[key]["coords"] in Game.dict_room_coords:
-                    Game.dict_room_coords[contour[key]["coords"]].contenu.signature()
+        for key in contour:  # key est ici les différentes input possibles
+            if contour[key]["coords"] in Game.dict_case_coords:  # Si se qui se trouve autour du joueur est une case
+                keys[key] = contour[key]["tuple"]  # Alors le joueur peut s'y déplacer
+                if contour[key]["coords"] in Game.dict_room_coords:  # Et si c'est une salle
+                    Game.dict_room_coords[contour[key]["coords"]].contenu.signature()  # On éxécute la signature de son contenu
 
-        print(Game.dict_case_coords[Game.player.coords])
+        print(Game.dict_case_coords[Game.player.coords])  # Affiche la salle où se trouve le joueur
         order = input()
 
-        if order in keys:
-            Game.player.move(keys[order][0], keys[order][1])
+        if order in keys:  # Si l'ordre du joueur se trouve bien dans les possibilités définies plus tôt
+            Game.player.move(keys[order][0], keys[order][1])  # Le joueur se déplace vers la direction souhaitée
 
-            if Game.player.coords in Game.dict_room_coords:
-                Game.dict_room_coords[Game.player.coords].contenu.effect()
+            if Game.player.coords in Game.dict_room_coords:  # Si le joueur arrive dans une salle
+                Game.dict_room_coords[Game.player.coords].contenu.effect()  # On execute l'effet de la salle
 
-                if Game.player.energy <= 0:
-                    self.loose()
+                if Game.player.energy <= 0:  # Si l'énergie du joueur est tombée sous 0
+                    self.loose()  # Le joueur perd
 
-            if Game.player.coords == Game.porte.coords:
-                self.win()
+            if Game.player.coords == Game.porte.coords:  # Si le joueur est arrivé à la porte du paradis
+                self.win()  # Le joueur gagne
 
-            self.turn()
+            self.turn()  # Si le joueur ne gagne ni ne perd, alors il commence un nouveau tour
 
-        else:
+        else:  # Si l'ordre donnée par le joueur ne fait pas parti des possibilités
             print("Tu ne peut pas aller par là")
-            self.turn()
+            self.turn()  # Le joueur recommence son tour
 
     @staticmethod  # Fonction n'ayant pas besoin de l'instance de l'objet pour fonctionner
     def win():
