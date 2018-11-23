@@ -17,15 +17,18 @@ class Game:
         """ Cette fonction initialise le plateau le jeu
             Elle permet également de choisir la generation basique ou random """
 
-        Game.matrice = Game._gen_basic() if basic else Game._gen_random()
-        for y in range(len(Game.matrice)):
-            for x in range(len(Game.matrice[y])):
-                current_case = Game.matrice[y][x]
-                if current_case != " ":
-                    Game.dict_case_coords["{} {}".format(x, y)] = Case(x, y, current_case)
+        Game.matrice = Game._gen_basic() if basic else Game._gen_random()  # Récupère la matrice de jeu
 
-                if current_case in ["┏", "⍈", "┏", "┣", "┗", "┓", "┫", "┛"]:
-                    Game.dict_room_coords["{} {}".format(x, y)] = Room(x, y, current_case)
+        for y in range(len(Game.matrice)):           # Pour chaque coordonnées sur la matrice
+            for x in range(len(Game.matrice[y])):
+
+                current_case = Game.matrice[y][x]  # On récupère la case de la matrice définie par ses coordonnées
+
+                if current_case != " ":  # Si la case n'est pas vide
+                    Game.dict_case_coords["{} {}".format(x, y)] = Case(x, y, current_case)  # ALors c'est une case
+
+                if current_case in ["┏", "⍈", "┏", "┣", "┗", "┓", "┫", "┛"]:  # Si la case fait partie de cette liste
+                    Game.dict_room_coords["{} {}".format(x, y)] = Room(x, y, current_case)  # Alors c'est une salle
 
                 if current_case == "x":
                     Game.reception = Room(x, y, current_case)
