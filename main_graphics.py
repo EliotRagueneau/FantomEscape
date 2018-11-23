@@ -1,6 +1,5 @@
 from tkinter import *
 import random as rd
-import time
 
 
 class Plateau:
@@ -110,8 +109,6 @@ class Plateau:
         if Plateau.player.coords in Plateau.dict_room_coords:
             Plateau.dict_room_coords[Plateau.player.coords].contenu.effect()
             Plateau.show_surroundings()
-            if Plateau.player.energy <= 0:
-                Plateau.loose()
 
         if Plateau.player.coords == Plateau.porte.coords:
             Plateau.win()
@@ -138,6 +135,8 @@ class Plateau:
         if Plateau.player.coords not in Plateau.dict_room_coords:
             for surounding in Plateau.player.surrounding_coords:
                 if surounding in Plateau.dict_case_coords:
+                    if surounding in Plateau.dict_room_coords:
+                        Plateau.dict_case_coords[surounding].draw("gray22")
                     Plateau.dict_case_coords[surounding].draw("gray22")
         Plateau.dict_case_coords[Plateau.player.coords].draw()
 
@@ -152,52 +151,14 @@ class Plateau:
     def __repr__(self):
         return "\n".join(["".join(line) for line in Plateau.matrice])
 
-    def turn(self):
-        x = Plateau.player.x
-        y = Plateau.player.y
-        keys = {}
-
-        contour = {"z": {"coords": "{} {}".format(x, y - 1), "tuple": (x, y - 1)},
-                   "q": {"coords": "{} {}".format(x - 1, y), "tuple": (x - 1, y)},
-                   "s": {"coords": "{} {}".format(x, y + 1), "tuple": (x, y + 1)},
-                   "d": {"coords": "{} {}".format(x + 1, y), "tuple": (x + 1, y)}
-                   }
-
-        for key in contour:
-            if contour[key]["coords"] in Plateau.dict_case_coords:
-                keys[key] = contour[key]["tuple"]
-                if contour[key]["coords"] in Plateau.dict_room_coords:
-                    Plateau.dict_room_coords[contour[key]["coords"]].contenu.signature()
-
-        print(Plateau.dict_case_coords[Plateau.player.coords])
-        order = input()
-
-        if order in keys:
-            Plateau.player.move(keys[order][0], keys[order][1])
-
-            if Plateau.player.coords in Plateau.dict_room_coords:
-                Plateau.dict_room_coords[Plateau.player.coords].contenu.effect()
-
-                if Plateau.player.energy <= 0:
-                    self.loose()
-
-            if Plateau.player.coords == Plateau.porte.coords:
-                self.win()
-
-            self.turn()
-
-        else:
-            print("Tu ne peut pas aller par là")
-            self.turn()
-
     @staticmethod
     def win():
-        Plateau.console["text"] = "Félicitations, vous êtes arrivés à la porte du Paradis !"
+        Affiche("stairway-to-heaven.gif", "Félicitations, vous êtes arrivés à la porte du Paradis !")
         Plateau.root.bind_all("<Key>", exit)
 
     @staticmethod
     def loose():
-        Plateau.console["text"] = "Tu n'as plus d'énergie et tu errera désormais à jamais dans les limbes"
+        Affiche("ghost_buster.gif", "Tu n'as plus d'énergie et tu erreras désormais à jamais dans les limbes")
         Plateau.root.bind_all("<Key>", exit)
 
 
@@ -491,6 +452,7 @@ class LandLord(Enemy):
         Plateau.console["text"] += "Cling cling\n"
 
     def effect(self):
+        Affiche("majordome.gif", "Retourne donc à la Réception mon très cher Gasper !")
         Plateau.player.move(Plateau.reception.x, Plateau.reception.y)
 
     def __repr__(self):
@@ -539,6 +501,8 @@ class Affiche:
     def _close(self, event):
         self.affiche.destroy()
         Plateau.root.bind_all("<Key>", Plateau.move)
+        if Plateau.player.energy <= 0:
+            Plateau.loose()
 
 
 class Energy(Contenu):
@@ -560,21 +524,22 @@ class Player:
     def __init__(self):
         self.x = Plateau.reception.x
         self.y = Plateau.reception.y
-        self.coords = "{} {}".format(self.x, self.y)
         self.energy = 3
-        self.surrounding_coords = ["{} {}".format(self.x, self.y - 1),
-                                   "{} {}".format(self.x - 1, self.y),
-                                   "{} {}".format(self.x, self.y + 1),
-                                   "{} {}".format(self.x + 1, self.y)]
 
     def move(self, x=None, y=None):
         self.x = x if x else self.x
         self.y = y if y else self.y
-        self.coords = "{} {}".format(self.x, self.y)
-        self.surrounding_coords = ["{} {}".format(self.x, self.y - 1),
-                                   "{} {}".format(self.x - 1, self.y),
-                                   "{} {}".format(self.x, self.y + 1),
-                                   "{} {}".format(self.x + 1, self.y)]
+
+    @property
+    def coords(self):
+        return "{} {}".format(self.x, self.y)
+
+    @property
+    def surrounding_coords(self):
+        return ["{} {}".format(self.x, self.y - 1),
+                "{} {}".format(self.x - 1, self.y),
+                "{} {}".format(self.x, self.y + 1),
+                "{} {}".format(self.x + 1, self.y)]
 
 
 if __name__ == "__main__":
