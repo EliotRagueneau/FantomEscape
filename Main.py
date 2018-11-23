@@ -2,11 +2,17 @@ import random as rd
 
 
 class Plateau:
+    """ Cette fonction permet de construire la matrice
+    de configuerer les coordonnées de chaque éléments de la matrice mais aussi su joueur """
+
     matrice = reception = porte = player = None
     dict_room_coords = {}
     dict_case_coords = {}
 
     def __init__(self, basic: bool = True):
+        """ Cette fontion initaialise le plateau le jeu """
+        """ Elle permet egalement de choisir la generation basique ou random """
+
         Plateau.matrice = Plateau._gen_basic() if basic else Plateau._gen_random()
         for y in range(len(Plateau.matrice)):
             for x in range(len(Plateau.matrice[y])):
@@ -49,6 +55,8 @@ class Plateau:
 
     @staticmethod
     def _gen_basic():
+        """ plateau de jeu pour la version basique """
+
         return [[" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "],
                 [" ", " ", " ", "⎾", "⏤", "⏋", " ", "O", " ", " ", " "],
                 [" ", " ", " ", "|", " ", "|", " ", "|", " ", " ", " "],
@@ -63,12 +71,15 @@ class Plateau:
 
     @staticmethod
     def _gen_random():
+        """ définit une map aléatoirement """
         pass
 
     def __repr__(self):
+        """ pour chaque ligne de la matrice, on effectue un retour à la ligne """
         return "\n".join(["".join(line) for line in Plateau.matrice])
 
     def turn(self):
+        """ définit les coordonnées du joueur sur le plateau """
         x = Plateau.player.x
         y = Plateau.player.y
         keys = {}
@@ -106,8 +117,9 @@ class Plateau:
             print("Tu ne peut pas aller par là")
             self.turn()
 
-    @staticmethod
+    @staticmethod  """ methode fixe """
     def win():
+        """ Cette fonction montre cette illustration quand le joueur gagne """
         print("                                                   .-')                 ",
               "                                                  /   |                 ",
               "                                                .' /  F                 ",
@@ -167,6 +179,7 @@ class Plateau:
 
     @staticmethod
     def loose():
+        """ Cette fonction montre cette illustration quand le joueur perd """
         print("                   _.-, ",
               "              _ .-'  / .._",
               "           .-:'/ - - \:::::-.",
@@ -190,6 +203,7 @@ class Plateau:
 
 
 class Case:
+    """ Cette classe permet au joueur de visualiser sur la console la salle ou il se situe """
     dict_repr = {"⍈": "               \n" +
                       "  ┏━━━━━━━━━┓  \n" +
                       " ┯┛         ┗┯ \n" +
@@ -311,16 +325,19 @@ class Case:
                  }
 
     def __init__(self, x, y, symbole):
+        """ Cette fonction récupère les coordonnées pour chaque salle sur le plateau de jeu """
         self.x = x
         self.y = y
         self.coords = "{} {}".format(x, y)
         self.type = symbole
 
     def __repr__(self):
+        """ recupere le type de piece, si c'est un couloir, porte ....  """
         return Case.dict_repr[self.type]
 
 
 class Contenu:
+    """ je sais pas """
     def __repr__(self):
         return "Salle vide"
 
@@ -332,6 +349,7 @@ class Contenu:
 
 
 class Room(Case):
+    """ cette fonctin sert à recupere les coordonnée de la room """
     def __init__(self, x, y, symbole, contenu=Contenu()):
         super(Room, self).__init__(x, y, symbole)
         self.contenu = contenu
@@ -343,10 +361,13 @@ class Enemy(Contenu):
 
 
 class LandLord(Enemy):
+    """ cette fonction regroupe le message du LandLord, et l'effet qu'il procure sur le joueur """
     def signature(self):
+        """ message que le joueur percoit """
         print("Cling Cling !")
 
     def effect(self):
+        """ effet de l'ennemie sur le joueur """
         print("                               _________",
               "                              [_________]",
               "                      ,,,,,      _|//",
@@ -381,10 +402,13 @@ class LandLord(Enemy):
 
 
 class MadScientist(Enemy):
+    """ cette fonction regroupe le message du MadScientist, et l'effet qu'il procure sur le joueur """
     def signature(self):
+        """ message que le joueur percoit """
         print("Mwah ah ah ah !")
 
     def effect(self):
+        """ effet de l'ennemie sur le joueur """
         print(
             "                                            . ",
             "                        .   \\ \\ / \\ \\|   \\ | / /  ,",
@@ -432,10 +456,13 @@ class MadScientist(Enemy):
 
 
 class Bibendum(Enemy):
+    """ cette fonction regroupe le message du bibendum, et l'effet qu'il procure sur le joueur """
     def signature(self):
+        """ message que le joueur percoit """
         print("Ça sent bon par ici !")
 
     def effect(self):
+        """ effet de l'ennemie sur le joueur """
         print("     ,...._                          _,.._",
               "    (  \ \\\"b_.._                  _,d8P\"\"Y8o.",
               "    `8\ \ \ 8P\"8                 ,8\"  _    _Yb.",
@@ -496,13 +523,16 @@ class Bibendum(Enemy):
 
 
 class Energy(Contenu):
+    """ cette fonction definit le compteur de pintes d'energie, et l'image associe à la pinte """
     def __init__(self, amount):
+        """ compteur d'energie """
         self.amount = amount
 
     def __repr__(self):
         return "{} pintes vertes d'énergie".format(self.amount)
 
     def effect(self):
+        """ image montrant les pintes récupéré """
         print(
             "           _",
             "        ,-'  `-._",
@@ -522,12 +552,14 @@ class Energy(Contenu):
 class Player:
 
     def __init__(self):
+        """ definit les coordonnées de la case départ """
         self.x = Plateau.reception.x
         self.y = Plateau.reception.y
         self.coords = "{} {}".format(self.x, self.y)
         self.energy = 3
 
     def move(self, x, y):
+        """ cette fonction recupère les coordonnées propre au joueur """
         self.x = x
         self.y = y
         self.coords = "{} {}".format(self.x, self.y)
