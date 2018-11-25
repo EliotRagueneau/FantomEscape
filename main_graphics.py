@@ -75,7 +75,7 @@ class Plateau:
         Plateau.console = Label(Plateau.main_frame, bg="black", fg="white")
         Plateau.console.pack(side="left")
 
-        control_image = PhotoImage(file="control.gif")
+        control_image = PhotoImage(file="Ressources/gif/control.gif")
         control = Label(Plateau.main_frame, text="Controles", image=control_image)
         control.pack(side="right")
 
@@ -153,12 +153,12 @@ class Plateau:
 
     @staticmethod
     def win():
-        Affiche("stairway-to-heaven.gif", "Félicitations, vous êtes arrivés à la porte du Paradis !")
+        Affiche("Ressources/gif/stairway-to-heaven.gif", "Félicitations, vous êtes arrivés à la porte du Paradis !")
         Plateau.root.bind_all("<Key>", exit)
 
     @staticmethod
     def loose():
-        Affiche("ghost_buster.gif", "Tu n'as plus d'énergie et tu erreras désormais à jamais dans les limbes")
+        Affiche("Ressources/gif/ghost_buster.gif", "Tu n'as plus d'énergie et tu erreras désormais à jamais dans les limbes")
         Plateau.root.bind_all("<Key>", exit)
 
 
@@ -452,7 +452,7 @@ class LandLord(Enemy):
         Plateau.console["text"] += "Cling cling\n"
 
     def effect(self):
-        Affiche("majordome.gif", "Retourne donc à la Réception mon très cher Gasper !")
+        Affiche("Ressources/gif/majordome.gif", "Retourne donc à la Réception mon très cher Gasper !")
         Plateau.player.move(Plateau.reception.x, Plateau.reception.y)
 
     def __repr__(self):
@@ -464,7 +464,7 @@ class MadScientist(Enemy):
         Plateau.console["text"] += "Mwah ah ah !\n"
 
     def effect(self):
-        Affiche("Mad_Scientist.gif", "Tu es téléporté dans une salle aléatoire et tu perd 1 énergie")
+        Affiche("Ressources/gif/Mad_Scientist.gif", "Tu es téléporté dans une salle aléatoire et tu perd 1 énergie")
         Plateau.player.energy -= 1
         chosen_case = Plateau.dict_case_coords[rd.choice(list(Plateau.dict_case_coords))]
         Plateau.player.move(chosen_case.x, chosen_case.y)
@@ -478,31 +478,11 @@ class Bibendum(Enemy):
         Plateau.console["text"] += "Ça sent bon par ici !\n"
 
     def effect(self):
-        Affiche("bibendum.gif", "Vous êtes paralysés et perdez 2 énergies")
+        Affiche("Ressources/gif/bibendum.gif", "Vous êtes paralysés et perdez 2 énergies")
         Plateau.player.energy -= 2
 
     def __repr__(self):
         return "Bibbendum"
-
-
-class Affiche:
-    def __init__(self, file, text):
-        self.affiche = Toplevel(Plateau.root)
-        self.frame = Frame(self.affiche, bg="black")
-        self.frame.pack()
-        self.image = PhotoImage(file=file)
-
-        self.image_label = Label(self.frame, image=self.image)
-        self.image_label.pack()
-        self.label = Label(self.frame, bg="black", fg="white", text=text)
-        self.label.pack()
-        Plateau.root.bind_all("<Key>", self._close)
-
-    def _close(self, event):
-        self.affiche.destroy()
-        Plateau.root.bind_all("<Key>", Plateau.move)
-        if Plateau.player.energy <= 0:
-            Plateau.loose()
 
 
 class Energy(Contenu):
@@ -514,9 +494,29 @@ class Energy(Contenu):
 
     def effect(self):
         if self.amount:
-            Plateau.console["text"] = "Vous avez trouver {} pintes d'ectoplasme vert".format(self.amount)
+            Affiche("Ressources/gif/beer.gif", "Vous avez trouver {} pintes d'ectoplasme vert".format(self.amount))
             Plateau.player.energy += self.amount
             self.amount = 0
+
+
+class Affiche:
+    def __init__(self, file, text):
+        self.affiche = Toplevel(Plateau.root)
+        self.frame = Frame(self.affiche, bg="black")
+        self.frame.pack()
+        self.image = PhotoImage(file=file)
+
+        self.image_label = Label(self.frame, image=self.image)
+        self.image_label.pack()
+        self.label = Label(self.frame, bg="black", fg="white", text=text, font=("Helvetica", "16") )
+        self.label.pack()
+        Plateau.root.bind_all("<Key>", self._close)
+
+    def _close(self, event):
+        self.affiche.destroy()
+        Plateau.root.bind_all("<Key>", Plateau.move)
+        if Plateau.player.energy <= 0:
+            Plateau.loose()
 
 
 class Player:
