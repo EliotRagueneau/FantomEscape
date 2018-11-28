@@ -1,7 +1,3 @@
-from Main import *
-
-@staticmethod
-
 def win():
     """ Cette fonction affiche cette illustration quand le joueur gagne """
     print("                                                   .-')                 ",
@@ -57,9 +53,7 @@ def win():
           "                            `:::::'                 ",
           "                              `-'                 ",
           sep="\n")
-    print("Félicitations, vous êtes arrivés à la porte du Paradis !")
-    input()
-    exit()
+
 
 def loose():
     """ Cette fonction affiche cette illustration quand le joueur perd """
@@ -80,6 +74,4 @@ def loose():
           "           '-::::::::::::::-'",
           "               '''::::'''",
           sep="\n")
-    print("Tu n'as plus d'énergie et tu errera désormais à jamais dans les limbes")
-    input()
-    exit()
+

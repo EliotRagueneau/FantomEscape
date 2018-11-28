@@ -3,7 +3,7 @@ from main_graphics import *
 
 
 def _gen_random():
-    matrice_ori = Plateau._gen_basic()
+    matrice_ori = Game._gen_basic()
     liste_cases = []
     for ligne in matrice_ori:
         for case in ligne:

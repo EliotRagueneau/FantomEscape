@@ -1,5 +1,6 @@
 import random as rd
-from image import *
+import image
+
 
 class Game:
     """Classe regroupant l'ensemble des fonctionnalités du jeu
@@ -26,7 +27,7 @@ class Game:
                 current_case = Game.matrice[y][x]  # On récupère la case de la matrice définie par ses coordonnées
 
                 if current_case != " ":  # Si la case n'est pas vide
-                    Game.dict_case_coords["{} {}".format(x, y)] = Case(x, y, current_case)  # ALors c'est une case
+                    Game.dict_case_coords["{} {}".format(x, y)] = Case(x, y, current_case)  # Alors c'est une case
 
                 if current_case in ["┏", "⍈", "┏", "┣", "┗", "┓", "┫", "┛"]:  # Si la case fait partie de cette liste
                     Game.dict_room_coords["{} {}".format(x, y)] = Room(x, y, current_case)  # Alors c'est une salle
@@ -69,15 +70,15 @@ class Game:
         """Génère la matrice map basique telle que montrée dans le sujet"""
 
         return [[" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "],
-                [" ", " ", " ", "⎾", "⏤", "⏋", " ", "O", " ", " ", " "],
+                [" ", " ", " ", "⌜", "─", "⌝", " ", "O", " ", " ", " "],
                 [" ", " ", " ", "|", " ", "|", " ", "|", " ", " ", " "],
-                [" ", "┏", "⏤", "+", "⍈", "+", "⍈", "+", "⏤", "┓", " "],
+                [" ", "┏", "─", "+", "⍈", "+", "⍈", "+", "─", "┓", " "],
                 [" ", "┊", " ", "|", " ", "|", " ", "|", " ", "┊", " "],
-                [" ", "┣", "⏤", "+", "⍈", "+", "⍈", "+", "⏤", "┫", " "],
+                [" ", "┣", "─", "+", "⍈", "+", "⍈", "+", "─", "┫", " "],
                 [" ", "┊", " ", "|", " ", "|", " ", "|", " ", "┊", " "],
-                [" ", "┗", "⏤", "+", "⍈", "+", "⍈", "⏊", "⏤", "┛", " "],
+                [" ", "┗", "─", "+", "⍈", "+", "⍈", "⊥", "─", "┛", " "],
                 [" ", " ", " ", "|", " ", "|", " ", " ", " ", " ", " "],
-                [" ", " ", " ", "⎿", "x", "⏌", " ", " ", " ", " ", " "],
+                [" ", " ", " ", "⌞", "x", "⌟", " ", " ", " ", " ", " "],
                 [" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "]]
 
     @staticmethod
@@ -97,19 +98,20 @@ class Game:
 
         keys = {}  # Initialise le dictionnaire contenant les mouvements possibles du joueur à chaque tour
 
-        contour = {"z": {"coords": "{} {}".format(x, y - 1), "tuple": (x, y - 1)},
-                   "q": {"coords": "{} {}".format(x - 1, y), "tuple": (x - 1, y)},
-                   "s": {"coords": "{} {}".format(x, y + 1), "tuple": (x, y + 1)},
-                   "d": {"coords": "{} {}".format(x + 1, y), "tuple": (x + 1, y)}
+        contour = {"{} {}".format(x, y - 1): {"new_coords": (x, y - 1), "order": ("z", "8")},
+                   "{} {}".format(x - 1, y): {"new_coords": (x - 1, y), "order": ("q", "4")},
+                   "{} {}".format(x, y + 1): {"new_coords": (x, y + 1), "order": ("s", "2")},
+                   "{} {}".format(x + 1, y): {"new_coords": (x + 1, y), "order": ("d", "6")}
                    }
 
-        for key in contour:  # key est ici les différentes input possibles: z, q, s, d
+        for contour_coords in contour:
 
-            if contour[key]["coords"] in Game.dict_case_coords:  # Si ce qui se trouve autour du joueur est une case
-                keys[key] = contour[key]["tuple"]  # Alors le joueur peut s'y déplacer
+            if contour_coords in Game.dict_case_coords:  # Si ce qui se trouve autour du joueur est une case
+                for order in contour[contour_coords]["order"]:
+                    keys[order] = contour[contour_coords]["new_coords"]  # Alors le joueur peut s'y déplacer
 
-                if contour[key]["coords"] in Game.dict_room_coords:  # Et si c'est une salle
-                    Game.dict_room_coords[contour[key]["coords"]].contenu.signature()  # On éxécute la signature de son contenu
+                if contour_coords in Game.dict_room_coords:  # Et si c'est une salle
+                    Game.dict_room_coords[contour_coords].contenu.signature()  # On exécute la signature de son contenu
 
         print(Game.dict_case_coords[Game.player.coords])  # Affiche la salle où se trouve le joueur
 
@@ -133,10 +135,21 @@ class Game:
             print("Tu ne peut pas aller par là")
             self.turn()  # Le joueur recommence son tour
 
-    #@staticmethod  # Fonction n'ayant pas besoin de l'instance de l'objet pour fonctionner
+    @staticmethod  # Fonction n'ayant pas besoin de l'instance de l'objet pour fonctionner
+    def win():
+        """ Cette fonction affiche cette illustration quand le joueur gagne """
+        image.win()
+        print("Félicitations, vous êtes arrivés à la porte du Paradis !")
+        input()
+        exit()
 
-    #@staticmethod
-
+    @staticmethod
+    def loose():
+        """ Cette fonction affiche cette illustration quand le joueur perd """
+        image.loose()
+        print("Tu n'as plus d'énergie et tu errera désormais à jamais dans les limbes")
+        input()
+        exit()
 
 
 class Case:
@@ -211,14 +224,14 @@ class Case:
                       "      ┃ ┃      \n" +
                       "      ┋ ┋      \n",
 
-                 "⎿": "      ┋ ┋      \n" +
+                 "⌞": "      ┋ ┋      \n" +
                       "      ┃ ┃      \n" +
                       "      ┃ ┗━━━━━┯\n" +
                       "      ┗━━━━━━━┷\n" +
                       "               \n" +
                       "               \n",
 
-                 "⏌": "      ┋ ┋      \n" +
+                 "⌟": "      ┋ ┋      \n" +
                       "      ┃ ┃      \n" +
                       "┯━━━━━┛ ┃      \n" +
                       "┷━━━━━━━┛      \n" +
@@ -232,30 +245,30 @@ class Case:
                       "      ┃ ┃      \n" +
                       "      ┋ ┋      \n",
 
-                 "⎾": "               \n" +
+                 "⌜": "               \n" +
                       "               \n" +
                       "      ┏━━━━━━━┉\n" +
                       "      ┃ ┏━━━━━┉\n" +
                       "      ┃ ┃      \n" +
                       "      ┋ ┋      \n",
 
-                 "⏤": "               \n" +
+                 "─": "               \n" +
                       "               \n" +
                       "┉━━━━━━━━━━━━━┉\n" +
                       "┉━━━━━━━━━━━━━┉\n" +
                       "               \n" +
                       "               \n",
 
-                 "⏋": "               \n" +
+                 "⌝": "               \n" +
                       "               \n" +
                       "┉━━━━━━━┓      \n" +
                       "┉━━━━━┓ ┃      \n" +
-                      "      ┃o┃      \n" +
+                      "      ┃ ┃      \n" +
                       "      ┋ ┋      \n",
 
-                 "⏊": "      ┋ ┋      \n" +
+                 "⊥": "      ┋ ┋      \n" +
                       "      ┃ ┃      \n" +
-                      "┯━━━━━┛o┗━━━━━┯\n" +
+                      "┯━━━━━┛ ┗━━━━━┯\n" +
                       "┷━━━━━━━━━━━━━┷\n" +
                       "               \n" +
                       "               \n",
