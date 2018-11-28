@@ -74,7 +74,7 @@ def loose():
           "           '-::::::::::::::-'",
           "               '''::::'''",
           sep="\n")
-def effect(self):
+def effect():
     """Effet invoqué quand le joueur se trouve dans la pièce contenant l'énergie"""
     print(
         "           _",
@@ -88,7 +88,7 @@ def effect(self):
         "        `======='",
         sep="\n")
 
-def effect1(self):
+def LandLord():
     """Effet invoqué quand le joueur se trouve dans la pièce contenant le Maître du Chateau"""
     print("                               _________",
           "                              [_________]",
@@ -117,7 +117,7 @@ def effect1(self):
           "Retourne donc à la Réception mon très cher Gasper !",
           sep="\n")
 
-def effect2(self):
+def MadScientist():
     """Effet invoqué quand le joueur se trouve dans la pièce contenant le Scientifique Fou"""
     print(
         "                                            . ",
@@ -155,7 +155,7 @@ def effect2(self):
         sep="\n")
 
 
-def effect3(self):
+def  Bibendum():
     """Effet invoqué quand le joueur se trouve dans la pièce contenant le Bibendum"""
     print("     ,...._                          _,.._",
           "    (  \ \\\"b_.._                  _,d8P\"\"Y8o.",

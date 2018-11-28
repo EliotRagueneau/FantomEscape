@@ -322,7 +322,7 @@ class Energy(Contenu):
 
     def effect(self):
         """Effet invoqué quand le joueur se trouve dans la pièce contenant l'énergie"""
-        image.effect(self)
+        image.effect()
         print("Vous avez trouver {} pintes d'ectoplasme vert".format(self.amount))
         Game.player.energy += self.amount
         self.amount = 0
@@ -340,9 +340,9 @@ class LandLord(Enemy):
         """Signature du Maître du Chateau perçue quand le joueur se trouve autour de la pièce le contenant"""
         print("Cling Cling !")
 
-    def effect1(self):
+    def effect(self):
         """Effet invoqué quand le joueur se trouve dans la pièce contenant le Maître du Chateau"""
-        image.effect1(self)
+        image.Landlord()
         input()
         Game.player.move(Game.reception.x, Game.reception.y)
 
@@ -357,9 +357,9 @@ class MadScientist(Enemy):
         """Signature du Scientifique Fou perçue quand le joueur se trouve autour de la pièce le contenant"""
         print("Mwah ah ah ah !")
 
-    def effect2(self):
+    def effect(self):
         """Effet invoqué quand le joueur se trouve dans la pièce contenant le Scientifique Fou"""
-        image.effect2(self)
+        image.MadScientist()
         print("Dans sa fureur, il vous téléporte dans une salle aléatoire !")
         Game.player.energy -= 1
         chosen_case = Game.dict_case_coords[rd.choice(list(Game.dict_case_coords))]
@@ -379,9 +379,9 @@ class Bibendum(Enemy):
         """Signature du Bibendum perçue quand le joueur se trouve autour de la pièce le contenant"""
         print("Ça sent bon par ici !")
 
-    def effect3(self):
+    def effect(self):
         """Effet invoqué quand le joueur se trouve dans la pièce contenant le Bibendum"""
-        image.effect3(self)
+        image.Bibendum()
         input()
         input()
         input()
