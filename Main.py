@@ -8,7 +8,7 @@ class Game:
             z  ==> Aller en haut
             q  ==> Aller à gauche
             s  ==> Aller en bas
-            d  ==> Aller à droite"""
+            d  ==> Aller à droite """
 
     matrice = reception = porte = player = None
     dict_room_coords = {}
@@ -17,6 +17,8 @@ class Game:
     def __init__(self, basic: bool = True):
         """ Cette fonction initialise le plateau le jeu
             Elle permet également de choisir la generation basique ou random """
+
+        print(" \n Contrôles: \n \t z ou 8 ==> Aller en haut \n \t q ou 4 ==> Aller à gauche \n \t s ou 2 ==> Aller en bas \n \t d ou 6 ==> Aller à droite \n ")
 
         Game.matrice = Game._gen_basic() if basic else Game._gen_random()  # Récupère la matrice de jeu
 
