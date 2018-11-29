@@ -1,5 +1,5 @@
 def win():
-    """ Cette fonction affiche cette illustration quand le joueur gagne """
+    """Illustration de victoire"""
     print("                                                   .-')                 ",
           "                                                  /   |                 ",
           "                                                .' /  F                 ",
@@ -56,7 +56,7 @@ def win():
 
 
 def loose():
-    """ Cette fonction affiche cette illustration quand le joueur perd """
+    """Illustration de défaite"""
     print("                   _.-, ",
           "              _ .-'  / .._",
           "           .-:'/ - - \:::::-.",
@@ -77,7 +77,7 @@ def loose():
 
 
 def energy():
-    """Effet invoqué quand le joueur se trouve dans la pièce contenant l'énergie"""
+    """Illustration de la récupération d'énergie"""
     print(
         "           _",
         "        ,-'  `-._",
@@ -92,7 +92,7 @@ def energy():
 
 
 def land_lord():
-    """Effet invoqué quand le joueur se trouve dans la pièce contenant le Maître du Chateau"""
+    """Illustration du Maître du Chateau"""
     print("                               _________",
           "                              [_________]",
           "                      ,,,,,      _|//",
@@ -122,7 +122,7 @@ def land_lord():
 
 
 def mad_scientist():
-    """Effet invoqué quand le joueur se trouve dans la pièce contenant le Scientifique Fou"""
+    """Illustration du Scientifique Fou"""
     print(
         "                                            . ",
         "                        .   \\ \\ / \\ \\|   \\ | / /  ,",
@@ -160,7 +160,7 @@ def mad_scientist():
 
 
 def bibendum():
-    """Effet invoqué quand le joueur se trouve dans la pièce contenant le Bibendum"""
+    """Illustration du Bibendum"""
     print("     ,...._                          _,.._",
           "    (  \ \\\"b_.._                  _,d8P\"\"Y8o.",
           "    `8\ \ \ 8P\"8                 ,8\"  _    _Yb.",
