@@ -86,10 +86,10 @@ class Game:
     def move(event):
         x = Game.player.x
         y = Game.player.y
-        contour_coords = {"{} {}".format(x, y - 1): (("z", "Up", 8), Game.player.move_up),
-                          "{} {}".format(x - 1, y): (("q", "Left", 4), Game.player.move_left),
-                          "{} {}".format(x, y + 1): (("s", "Down", 2), Game.player.move_down),
-                          "{} {}".format(x + 1, y): (("d", "Right", 6), Game.player.move_right)
+        contour_coords = {"{} {}".format(x, y - 1): (("z", "Up", "8"), Game.player.move_up),
+                          "{} {}".format(x - 1, y): (("q", "Left", "4"), Game.player.move_left),
+                          "{} {}".format(x, y + 1): (("s", "Down", "2"), Game.player.move_down),
+                          "{} {}".format(x + 1, y): (("d", "Right", "6"), Game.player.move_right)
                           }
         order = event.keysym
         Game.console["text"] = ""
