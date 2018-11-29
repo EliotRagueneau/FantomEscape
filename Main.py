@@ -1,5 +1,5 @@
 import random as rd
-import image
+import illustration
 
 
 class Game:
@@ -21,6 +21,7 @@ class Game:
         Game.matrice = Game._gen_basic() if basic else Game._gen_random()  # Récupère la matrice de jeu
 
         # Récupération des informations contenus dans la matrice #
+
         for y in range(len(Game.matrice)):  # Pour chaque coordonnées sur la matrice
             for x in range(len(Game.matrice[y])):
 
@@ -39,6 +40,7 @@ class Game:
                     Game.porte = Room(x, y, current_case)  # On sauvegarde sa position
 
         # Distribution des pintes d'énergies #
+
         total_pinte = 5
         liste_pinte = []
         while total_pinte != 0:
@@ -47,6 +49,7 @@ class Game:
             total_pinte -= new_amount
 
         # Choix aléatoire des salles contenant quelque chose #
+
         list_filled_room_coords = rd.sample(list(Game.dict_room_coords), 5 + len(liste_pinte))
 
         Game.dict_room_coords[list_filled_room_coords[0]].contenu = LandLord()
@@ -85,10 +88,6 @@ class Game:
     def _gen_random():
         """ Génère la matrice map aléatoirement """
         pass
-
-    def __repr__(self):
-        """Permet d'afficher correctement la matrice"""
-        return "\n".join(["".join(line) for line in Game.matrice])
 
     def turn(self):
         """Définit le déroulement de chaque tour du jeu"""
@@ -138,7 +137,7 @@ class Game:
     @staticmethod  # Fonction n'ayant pas besoin de l'instance de l'objet pour fonctionner
     def win():
         """ Cette fonction affiche cette illustration quand le joueur gagne """
-        image.win()
+        illustration.win()
         print("Félicitations, vous êtes arrivés à la porte du Paradis !")
         input()
         exit()
@@ -146,7 +145,7 @@ class Game:
     @staticmethod
     def loose():
         """ Cette fonction affiche cette illustration quand le joueur perd """
-        image.loose()
+        illustration.loose()
         print("Tu n'as plus d'énergie et tu errera désormais à jamais dans les limbes")
         input()
         exit()
@@ -154,125 +153,7 @@ class Game:
 
 class Case:
     """ Cette classe permet au joueur de visualiser sur la console la salle ou il se situe """
-    dict_repr = {"⍈": "               \n" +
-                      "  ┏━━━━━━━━━┓  \n" +
-                      " ┯┛         ┗┯ \n" +
-                      " ┷┓         ┏┷ \n" +
-                      "  ┗━━━━━━━━━┛  \n" +
-                      "               \n",
-
-                 "x": "               \n" +
-                      "  ┏━━━━━━━━━┓  \n" +
-                      " ┯┛         ┗┯ \n" +
-                      " ┷┓         ┏┷ \n" +
-                      "  ┗━━━━━━━━━┛  \n" +
-                      "               \n",
-
-                 "┏": "               \n" +
-                      "  ┏━━━━━━━━━┓  \n" +
-                      "  ┃         ┗┯ \n" +
-                      "  ┃         ┏┷ \n" +
-                      "  ┗━━━┓ ┏━━━┛  \n" +
-                      "      ┠─┨      \n",
-
-                 "┣": "      ┠─┨      \n" +
-                      "  ┏━━━┛ ┗━━━┓  \n" +
-                      "  ┃         ┗┯ \n" +
-                      "  ┃         ┏┷ \n" +
-                      "  ┗━━━┓ ┏━━━┛  \n" +
-                      "      ┠─┨      \n",
-
-                 "┗": "      ┠─┨      \n" +
-                      "  ┏━━━┛ ┗━━━┓  \n" +
-                      "  ┃         ┗┯ \n" +
-                      "  ┃         ┏┷ \n" +
-                      "  ┗━━━━━━━━━┛  \n" +
-                      "               \n",
-
-                 "┓": "               \n" +
-                      "  ┏━━━━━━━━━┓  \n" +
-                      " ┯┛         ┃  \n" +
-                      " ┷┓         ┃  \n" +
-                      "  ┗━━━┓ ┏━━━┛  \n" +
-                      "      ┠─┨      \n",
-
-                 "┫": "      ┠─┨      \n" +
-                      "  ┏━━━┛ ┗━━━┓  \n" +
-                      " ┯┛         ┃  \n" +
-                      " ┷┓         ┃  \n" +
-                      "  ┗━━━┓ ┏━━━┛  \n" +
-                      "      ┠─┨      \n",
-
-                 "┛": "      ┠─┨      \n" +
-                      "  ┏━━━┛ ┗━━━┓  \n" +
-                      " ┯┛         ┃  \n" +
-                      " ┷┓         ┃  \n" +
-                      "  ┗━━━━━━━━━┛  \n" +
-                      "               \n",
-
-                 "┊": "      ┠─┨      \n" +
-                      "      ┃ ┃      \n" +
-                      "      ┃ ┃      \n" +
-                      "      ┃ ┃      \n" +
-                      "      ┃ ┃      \n" +
-                      "      ┠─┨      \n",
-
-                 "|": "      ┋ ┋      \n" +
-                      "      ┃ ┃      \n" +
-                      "      ┃ ┃      \n" +
-                      "      ┃ ┃      \n" +
-                      "      ┃ ┃      \n" +
-                      "      ┋ ┋      \n",
-
-                 "⌞": "      ┋ ┋      \n" +
-                      "      ┃ ┃      \n" +
-                      "      ┃ ┗━━━━━┯\n" +
-                      "      ┗━━━━━━━┷\n" +
-                      "               \n" +
-                      "               \n",
-
-                 "⌟": "      ┋ ┋      \n" +
-                      "      ┃ ┃      \n" +
-                      "┯━━━━━┛ ┃      \n" +
-                      "┷━━━━━━━┛      \n" +
-                      "               \n" +
-                      "               \n",
-
-                 "+": "      ┋ ┋      \n" +
-                      "      ┃ ┃      \n" +
-                      "┯━━━━━┛ ┗━━━━━┯\n" +
-                      "┷━━━━━┓ ┏━━━━━┷\n" +
-                      "      ┃ ┃      \n" +
-                      "      ┋ ┋      \n",
-
-                 "⌜": "               \n" +
-                      "               \n" +
-                      "      ┏━━━━━━━┉\n" +
-                      "      ┃ ┏━━━━━┉\n" +
-                      "      ┃ ┃      \n" +
-                      "      ┋ ┋      \n",
-
-                 "─": "               \n" +
-                      "               \n" +
-                      "┉━━━━━━━━━━━━━┉\n" +
-                      "┉━━━━━━━━━━━━━┉\n" +
-                      "               \n" +
-                      "               \n",
-
-                 "⌝": "               \n" +
-                      "               \n" +
-                      "┉━━━━━━━┓      \n" +
-                      "┉━━━━━┓ ┃      \n" +
-                      "      ┃ ┃      \n" +
-                      "      ┋ ┋      \n",
-
-                 "⊥": "      ┋ ┋      \n" +
-                      "      ┃ ┃      \n" +
-                      "┯━━━━━┛ ┗━━━━━┯\n" +
-                      "┷━━━━━━━━━━━━━┷\n" +
-                      "               \n" +
-                      "               \n",
-                 }
+    dict_repr = illustration.get_case_repr()
 
     def __init__(self, x, y, symbole):
         """Initialise chaque instance de case par ses coordonnées et son type définit par la matrice"""
@@ -317,12 +198,9 @@ class Energy(Contenu):
         """Initialise le contenue en énergie par le nombre d'énergie qu'elle contient"""
         self.amount = amount
 
-    def __repr__(self):
-        return "{} pintes vertes d'énergie".format(self.amount)
-
     def effect(self):
         """Effet invoqué quand le joueur se trouve dans la pièce contenant l'énergie"""
-        image.effect()
+        illustration.energy()
         print("Vous avez trouver {} pintes d'ectoplasme vert".format(self.amount))
         Game.player.energy += self.amount
         self.amount = 0
@@ -342,12 +220,9 @@ class LandLord(Enemy):
 
     def effect(self):
         """Effet invoqué quand le joueur se trouve dans la pièce contenant le Maître du Chateau"""
-        image.Landlord()
+        illustration.land_lord()
         input()
         Game.player.move(Game.reception.x, Game.reception.y)
-
-    def __repr__(self):
-        return "LandLord"
 
 
 class MadScientist(Enemy):
@@ -359,7 +234,7 @@ class MadScientist(Enemy):
 
     def effect(self):
         """Effet invoqué quand le joueur se trouve dans la pièce contenant le Scientifique Fou"""
-        image.MadScientist()
+        illustration.mad_scientist()
         print("Dans sa fureur, il vous téléporte dans une salle aléatoire !")
         Game.player.energy -= 1
         chosen_case = Game.dict_case_coords[rd.choice(list(Game.dict_case_coords))]
@@ -367,9 +242,6 @@ class MadScientist(Enemy):
 
         print("Le bougre en a profiter pour vous subtiliser une pinte d'énergie ...")
         input()
-
-    def __repr__(self):
-        return "MadScientist"
 
 
 class Bibendum(Enemy):
@@ -381,15 +253,12 @@ class Bibendum(Enemy):
 
     def effect(self):
         """Effet invoqué quand le joueur se trouve dans la pièce contenant le Bibendum"""
-        image.Bibendum()
+        illustration.bibendum()
         input()
         input()
         input()
         print("vous perdez 2 d'énergie")
         Game.player.energy -= 2
-
-    def __repr__(self):
-        return "Bibbendum"
 
 
 class Player:
