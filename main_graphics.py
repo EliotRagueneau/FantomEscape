@@ -3,35 +3,45 @@ import random as rd
 
 
 class Game:
+    """Classe regroupant l'ensemble des fonctionnalités du jeu"""
     matrice = reception = porte = player = energy_frame = None
     root = main_frame = console = control_image = control = None
     dict_room_coords = {}
     dict_case_coords = {}
 
     def __init__(self, basic: bool = True):
-        Game.matrice = Game._gen_basic() if basic else Game._gen_random()
+        """ Cette fonction initialise le plateau le jeu
+            Elle permet également de choisir la generation basique ou random """
 
-        for y in range(len(Game.matrice)):
+        Game.matrice = Game._gen_basic() if basic else Game._gen_random() # Récupère la matrice de jeu
+
+        # Récupération des informations contenus dans la matrice #
+
+        for y in range(len(Game.matrice)): # Pour chaque coordonnées sur la matrice
             for x in range(len(Game.matrice[y])):
-                current_case = Game.matrice[y][x]
-                if current_case != " ":
-                    Game.dict_case_coords["{} {}".format(x, y)] = Case(x, y, current_case)
+                current_case = Game.matrice[y][x] # On récupère la case de la matrice définie par ses coordonnées
+                if current_case != " ": # Si la case n'est pas vide
+                    Game.dict_case_coords["{} {}".format(x, y)] = Case(x, y, current_case) # Alors c'est une case
 
-                if current_case in ["┏", "⍈", "┏", "┣", "┗", "┓", "┫", "┛"]:
-                    Game.dict_room_coords["{} {}".format(x, y)] = Room(x, y, current_case)
+                if current_case in ["┏", "⍈", "┏", "┣", "┗", "┓", "┫", "┛"]:# Si la case fait partie de cette liste
+                    Game.dict_room_coords["{} {}".format(x, y)] = Room(x, y, current_case)  # Alors c'est une salle
 
-                if current_case == "x":
-                    Game.reception = Room(x, y, current_case)
+                if current_case == "x": # Si la case correspond à la réception
+                    Game.reception = Room(x, y, current_case)  # On sauvegarde sa position
 
-                elif current_case == "O":
-                    Game.porte = Room(x, y, current_case)
+                elif current_case == "O": # Si la case est la porte du paradis
+                    Game.porte = Room(x, y, current_case)  # On sauvegarde sa position
+
+        # Distribution des pintes d'énergies #
 
         total_pinte = 5
         liste_pinte = []
         while total_pinte != 0:
-            new_amount = rd.randint(1, 3 if total_pinte >= 3 else total_pinte)
+            new_amount = rd.randint(1, 3 if total_pinte >= 3 else total_pinte) # Entre 1 et 3 pintes par salle maximum
             liste_pinte.append(new_amount)
             total_pinte -= new_amount
+
+        # Choix aléatoire des salles contenant quelque chose #
 
         list_filled_room_coords = rd.sample(list(Game.dict_room_coords), 5 + len(liste_pinte))
 
@@ -39,7 +49,7 @@ class Game:
 
         Game.dict_room_coords[list_filled_room_coords[1]].contenu = MadScientist()
 
-        for bibendum_coords in list_filled_room_coords[2:5]:
+        for bibendum_coords in list_filled_room_coords[2:5]:   # Localisation des 3 Bibendum
             Game.dict_room_coords[bibendum_coords].contenu = Bibendum()
 
         n = 0
@@ -47,35 +57,37 @@ class Game:
             Game.dict_room_coords[pinte_room].contenu = Energy(liste_pinte[n])
             n += 1
 
-        Game.player = Player()
+        # Fin de l'initialisation #
+
+        Game.player = Player() # Placage du joueur à la réception
 
         # ====== GUI =======
 
-        Game.root = Tk()
-        Game.root.title("Fantom Escape")
+        Game.root = Tk() # Initialisation de tkinter
+        Game.root.title("Fantom Escape") # Titrer le jeu
 
-        Game.main_frame = Frame(Game.root, bg="black", bd=0, height=15, width=50)
-        Game.main_frame.pack()
+        Game.main_frame = Frame(Game.root, bg="black", bd=0, height=15, width=50) # Initialisation des paramètres de la fenètre
+        Game.main_frame.pack() # valable que pour la class main_frame
 
-        Game.energy_frame = Frame(Game.main_frame, bg="gray50")
-        Game.energy_frame.pack()
+        Game.energy_frame = Frame(Game.main_frame, bg="gray50") # initialisation de la feneètre correspondant à l'energie
+        Game.energy_frame.pack() # valable que pout la class energy_frame
 
         Game.energy = Label(Game.energy_frame, bg="black", fg="white",
-                            text="{} pintes d'énergies".format(Game.player.energy))
-        Game.energy.pack()
+                            text="{} pintes d'énergies".format(Game.player.energy)) # affichage de du nombre de pintes d'energie que le player gagne
+        Game.energy.pack() # valable que pour la class energy
 
         Game.canvas = Canvas(Game.main_frame,
                              width=len(Game.matrice[0]) * 50,
                              height=len(Game.matrice) * 25,
-                             bg="black", bd=0)
-        Game.canvas.pack()
+                             bg="black", bd=0) # paramètres avancés de la fenêtre
+        Game.canvas.pack() # spécifique au class main_frame, matrice
 
         Game.console = Label(Game.main_frame, bg="black", fg="white")
         Game.console.pack(side="left")
 
-        control_image = PhotoImage(file="Ressources/gif/control.gif")
-        control = Label(Game.main_frame, text="Controles", image=control_image)
-        control.pack(side="right")
+        control_image = PhotoImage(file="Ressources/gif/control.gif") # chemin de l'image
+        control = Label(Game.main_frame, text="Controles", image=control_image) # affichage des touches de controle
+        control.pack(side="right") # valable que pour cette class, position des contrôles a droite
 
         self.show_surroundings()
         Game.root.bind_all("<Key>", self.move)
@@ -83,7 +95,7 @@ class Game:
         Game.root.mainloop()
 
     @staticmethod
-    def move(event):
+    def move(event): 
         x = Game.player.x
         y = Game.player.y
         contour_coords = {"{} {}".format(x, y - 1): (("z", "Up", "KP_8"), Game.player.move_up),
