@@ -8,7 +8,7 @@ class Game:
     dict_room_coords = {}
     dict_case_coords = {}
 
-    def __init__(self, basic: bool = True):
+    def __init__(self, basic: bool = True, difficulty: float = 1):
         Game.matrice = Game._gen_basic() if basic else Game._gen_random()
 
         for y in range(len(Game.matrice)):
@@ -33,19 +33,31 @@ class Game:
             liste_pinte.append(new_amount)
             total_pinte -= new_amount
 
-        list_filled_room_coords = rd.sample(list(Game.dict_room_coords), 5 + len(liste_pinte))
+            # Détermination du nombre de monstres vis à vis de la difficulté donnée #
 
-        Game.dict_room_coords[list_filled_room_coords[0]].contenu = LandLord()
+            if not difficulty:  # Si l'utilisateur ne précise pas la difficulté
+                n_monster = 5  # 5 monstres de base
+            elif difficulty < 1:
+                n_monster = int(difficulty * (len(Game.dict_room_coords) - len(liste_pinte)))
+            else:  # 1 ou plus ==> Que des monstres et des pintes
+                n_monster = len(Game.dict_room_coords) - len(liste_pinte)
 
-        Game.dict_room_coords[list_filled_room_coords[1]].contenu = MadScientist()
+            # Choix aléatoire des salles contenant quelque chose #
 
-        for bibendum_coords in list_filled_room_coords[2:5]:
-            Game.dict_room_coords[bibendum_coords].contenu = Bibendum()
+            list_filled_room_coords = rd.sample(list(Game.dict_room_coords), n_monster + len(liste_pinte))
 
-        n = 0
-        for pinte_room in list_filled_room_coords[5:]:
-            Game.dict_room_coords[pinte_room].contenu = Energy(liste_pinte[n])
-            n += 1
+            # Remplissage de ces salles #
+            n = 0
+            for i in range(len(list_filled_room_coords)):
+                if i == 0:  # Un seul LandLord
+                    Game.dict_room_coords[list_filled_room_coords[i]].contenu = LandLord()
+                elif i < 0.4 * n_monster:  # 40% du reste des monstres serons des Mad Scientist
+                    Game.dict_room_coords[list_filled_room_coords[i]].contenu = MadScientist()
+                elif i < n_monster:  # Le reste des monstres seront des Bibendum
+                    Game.dict_room_coords[list_filled_room_coords[i]].contenu = Bibendum()
+                else:  # Hors monstre ==> Energie définis par liste_pinte
+                    Game.dict_room_coords[list_filled_room_coords[i]].contenu = Energy(liste_pinte[n])
+                    n += 1
 
         Game.player = Player()
 
@@ -78,12 +90,12 @@ class Game:
         control.pack(side="right")
 
         self.show_surroundings()
-        Game.root.bind_all("<Key>", self.move)
+        Game.root.bind_all("<Key>", self.turn)
 
         Game.root.mainloop()
 
     @staticmethod
-    def move(event):
+    def turn(event):
         x = Game.player.x
         y = Game.player.y
         contour_coords = {"{} {}".format(x, y - 1): (("z", "Up", "KP_8"), Game.player.move_up),
@@ -115,15 +127,15 @@ class Game:
     @staticmethod
     def _gen_basic():
         return [[" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "],
-                [" ", " ", " ", "⎾", "⏤", "⏋", " ", "O", " ", " ", " "],
+                [" ", " ", " ", "⌜", "─", "⌝", " ", "O", " ", " ", " "],
                 [" ", " ", " ", "|", " ", "|", " ", "|", " ", " ", " "],
-                [" ", "┏", "⏤", "+", "⍈", "+", "⍈", "+", "⏤", "┓", " "],
+                [" ", "┏", "─", "+", "⍈", "+", "⍈", "+", "─", "┓", " "],
                 [" ", "┊", " ", "|", " ", "|", " ", "|", " ", "┊", " "],
-                [" ", "┣", "⏤", "+", "⍈", "+", "⍈", "+", "⏤", "┫", " "],
+                [" ", "┣", "─", "+", "⍈", "+", "⍈", "+", "─", "┫", " "],
                 [" ", "┊", " ", "|", " ", "|", " ", "|", " ", "┊", " "],
-                [" ", "┗", "⏤", "+", "⍈", "+", "⍈", "⏊", "⏤", "┛", " "],
+                [" ", "┗", "─", "+", "⍈", "+", "⍈", "⊥", "─", "┛", " "],
                 [" ", " ", " ", "|", " ", "|", " ", " ", " ", " ", " "],
-                [" ", " ", " ", "⎿", "x", "⏌", " ", " ", " ", " ", " "],
+                [" ", " ", " ", "⌞", "x", "⌟", " ", " ", " ", " ", " "],
                 [" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "]]
 
     @staticmethod
@@ -137,7 +149,8 @@ class Game:
                     Game.dict_case_coords[surounding].draw("gray22")
         Game.dict_case_coords[Game.player.coords].draw()
 
-    def show_map(self):
+    @staticmethod
+    def show_map():
         for case in Game.dict_case_coords:
             Game.dict_case_coords[case].draw()
 
@@ -189,19 +202,19 @@ class Case:
 
                          "|": self.v_corridor,
 
-                         "⎿": self.c_bl_corridor,
+                         "⌞": self.c_bl_corridor,
 
-                         "⏌": self.c_br_corridor,
+                         "⌟": self.c_br_corridor,
 
                          "+": self.cross_section,
 
-                         "⎾": self.c_tl_corridor,
+                         "⌜": self.c_tl_corridor,
 
-                         "⏤": self.h_corridor,
+                         "─": self.h_corridor,
 
-                         "⏋": self.c_tr_corridor,
+                         "⌝": self.c_tr_corridor,
 
-                         "⏊": self.tri_b_corridor,
+                         "⊥": self.tri_b_corridor,
 
                          "O": self.porte
 
@@ -467,6 +480,9 @@ class MadScientist(Enemy):
         chosen_case = Game.dict_case_coords[rd.choice(list(Game.dict_case_coords))]
         Game.player.move(chosen_case.x, chosen_case.y)
 
+        if chosen_case.coords in Game.dict_room_coords:
+            Game.dict_room_coords[chosen_case.coords].contenu.effect()
+
     def __repr__(self):
         return "MadScientist"
 
@@ -512,7 +528,7 @@ class Affiche:
 
     def _close(self, event):
         self.affiche.destroy()
-        Game.root.bind_all("<Key>", Game.move)
+        Game.root.bind_all("<Key>", Game.turn)
         if Game.player.energy <= 0:
             Game.loose()
 
