@@ -14,19 +14,19 @@ class Game:
 
         # Récupération des informations contenus dans la matrice #
 
-        for y in range(len(Game.matrice)): # Pour chaque coordonnées sur la matrice
+        for y in range(len(Game.matrice)):  # Pour chaque coordonnées sur la matrice
             for x in range(len(Game.matrice[y])):
-                current_case = Game.matrice[y][x] # On récupère la case de la matrice définie par ses coordonnées
-                if current_case != " ": # Si la case n'est pas vide
-                    Game.dict_case_coords["{} {}".format(x, y)] = Case(x, y, current_case) # Alors c'est une case
+                current_case = Game.matrice[y][x]  # On récupère la case de la matrice définie par ses coordonnées
+                if current_case != " ":  # Si la case n'est pas vide
+                    Game.dict_case_coords["{} {}".format(x, y)] = Case(x, y, current_case)  # Alors c'est une case
 
-                if current_case in ["┏", "⍈", "┏", "┣", "┗", "┓", "┫", "┛"]:# Si la case fait partie de cette liste
+                if current_case in ["┏", "⍈", "┏", "┣", "┗", "┓", "┫", "┛"]:  # Si la case fait partie de cette liste
                     Game.dict_room_coords["{} {}".format(x, y)] = Room(x, y, current_case)  # Alors c'est une salle
 
-                if current_case == "x": # Si la case correspond à la réception
+                if current_case == "x":  # Si la case correspond à la réception
                     Game.reception = Room(x, y, current_case)  # On sauvegarde sa position
 
-                elif current_case == "O": # Si la case est la porte du paradis
+                elif current_case == "O":  # Si la case est la porte du paradis
                     Game.porte = Room(x, y, current_case)  # On sauvegarde sa position
 
         # Distribution des pintes d'énergies #
@@ -34,7 +34,7 @@ class Game:
         total_pinte = 5
         liste_pinte = []
         while total_pinte != 0:
-            new_amount = rd.randint(1, 3 if total_pinte >= 3 else total_pinte) # Entre 1 et 3 pintes par salle maximum
+            new_amount = rd.randint(1, 3 if total_pinte >= 3 else total_pinte)  # Entre 1 et 3 pintes par salle maximum
             liste_pinte.append(new_amount)
             total_pinte -= new_amount
 
@@ -66,35 +66,38 @@ class Game:
 
         # Fin de l'initialisation #
 
-        Game.player = Player() # Placage du joueur à la réception
+        Game.player = Player()  # Placage du joueur à la réception
 
         # ====== GUI =======
 
-        Game.root = Tk() # Initialisation de tkinter
-        Game.root.title("Fantom Escape") # Titrer le jeu
+        Game.root = Tk()  # Initialisation de tkinter
+        Game.root.title("Fantom Escape")  # Titrer le jeu
 
-        Game.main_frame = Frame(Game.root, bg="black", bd=0, height=15, width=50) # Initialisation des paramètres de la fenètre
-        Game.main_frame.pack() # valable que pour la class main_frame
+        Game.main_frame = Frame(Game.root, bg="black", bd=0, height=15,
+                                width=50)  # Initialisation des paramètres de la fenètre
+        Game.main_frame.pack()  # valable que pour la class main_frame
 
-        Game.energy_frame = Frame(Game.main_frame, bg="gray50") # initialisation de la feneètre correspondant à l'energie
-        Game.energy_frame.pack() # valable que pout la class energy_frame
+        Game.energy_frame = Frame(Game.main_frame,
+                                  bg="gray50")  # initialisation de la feneètre correspondant à l'energie
+        Game.energy_frame.pack()  # valable que pout la class energy_frame
 
         Game.energy = Label(Game.energy_frame, bg="black", fg="white",
-                            text="{} pintes d'énergies".format(Game.player.energy)) # affichage de du nombre de pintes d'energie que le player gagne
-        Game.energy.pack() # valable que pour la class energy
+                            text="{} pintes d'énergies".format(
+                                Game.player.energy))  # affichage de du nombre de pintes d'energie que le player gagne
+        Game.energy.pack()  # valable que pour la class energy
 
         Game.canvas = Canvas(Game.main_frame,
                              width=len(Game.matrice[0]) * 50,
                              height=len(Game.matrice) * 25,
-                             bg="black", bd=0) # paramètres avancés de la fenêtre
-        Game.canvas.pack() # spécifique au class main_frame, matrice
+                             bg="black", bd=0)  # paramètres avancés de la fenêtre
+        Game.canvas.pack()  # spécifique au class main_frame, matrice
 
         Game.console = Label(Game.main_frame, bg="black", fg="white")
         Game.console.pack(side="left")
 
-        control_image = PhotoImage(file="Ressources/gif/control.gif") # chemin de l'image
-        control = Label(Game.main_frame, text="Controles", image=control_image) # affichage des touches de controle
-        control.pack(side="right") # valable que pour cette class, position des contrôles a droite
+        control_image = PhotoImage(file="Ressources/gif/control.gif")  # chemin de l'image
+        control = Label(Game.main_frame, text="Controles", image=control_image)  # affichage des touches de controle
+        control.pack(side="right")  # valable que pour cette class, position des contrôles a droite
 
         self.show_surroundings()
         Game.root.bind_all("<Key>", self.turn)
@@ -109,25 +112,26 @@ class Game:
                           "{} {}".format(x - 1, y): (("q", "Left", "KP_4"), Game.player.move_left),
                           "{} {}".format(x, y + 1): (("s", "Down", "KP_2"), Game.player.move_down),
                           "{} {}".format(x + 1, y): (("d", "Right", "KP_6"), Game.player.move_right)
-                          } # dans un dictionnaire, mettre la choix du joueur
-        order = event.keysym # pemet de voir quelle touche le joueur a choisi
+                          }  # dans un dictionnaire, mettre la choix du joueur
+        order = event.keysym  # pemet de voir quelle touche le joueur a choisi
         Game.console["text"] = ""
         for contour_coord in contour_coords:
-            if contour_coord in Game.dict_case_coords and order in contour_coords[contour_coord][0]: # vérifier si l'ordre est présent dans le dico
+            if contour_coord in Game.dict_case_coords and order in contour_coords[contour_coord][0]:
+                # vérifier si l'ordre est présent dans le dico
                 Game.dict_case_coords[Game.player.coords].clear()
                 contour_coords[contour_coord][1]()
-                Game.show_surroundings() #
+                Game.show_surroundings()  #
 
-        for key in Game.player.surrounding_coords: # pour les clés du dico
-            if key in Game.dict_room_coords: # si la clé est présente
-                Game.dict_room_coords[key].contenu.signature() # affichage du message
+        for key in Game.player.surrounding_coords:  # pour les clés du dico
+            if key in Game.dict_room_coords:  # si la clé est présente
+                Game.dict_room_coords[key].contenu.signature()  # affichage du message
 
-        if Game.player.coords in Game.dict_room_coords: # si le joueur est dans une salle
-            Game.dict_room_coords[Game.player.coords].contenu.effect() # afficher l'effet que contient la salle
+        if Game.player.coords in Game.dict_room_coords:  # si le joueur est dans une salle
+            Game.dict_room_coords[Game.player.coords].contenu.effect()  # afficher l'effet que contient la salle
             Game.show_surroundings()
 
-        if Game.player.coords == Game.porte.coords: # si le joueur atteint les coordonnées de la porte du paradis
-            Game.win() # il gagne
+        if Game.player.coords == Game.porte.coords:  # si le joueur atteint les coordonnées de la porte du paradis
+            Game.win()  # il gagne
 
         Game.energy["text"] = "{} pintes d'énergies".format(Game.player.energy)
 
@@ -149,11 +153,11 @@ class Game:
     @staticmethod
     def show_surroundings():
         Game.canvas.delete("all")
-        if Game.player.coords not in Game.dict_room_coords: # si le joueur n'est dans une chambre
-            for surounding in Game.player.surrounding_coords: # pour les éléments autour de lui
-                if surounding in Game.dict_case_coords: # si autour de lui c'est une case
-                    if surounding in Game.dict_room_coords: # si autour de lui c'est une salle
-                        Game.dict_case_coords[surounding].draw("gray22") # afficher en gris
+        if Game.player.coords not in Game.dict_room_coords:  # si le joueur n'est dans une chambre
+            for surounding in Game.player.surrounding_coords:  # pour les éléments autour de lui
+                if surounding in Game.dict_case_coords:  # si autour de lui c'est une case
+                    if surounding in Game.dict_room_coords:  # si autour de lui c'est une salle
+                        Game.dict_case_coords[surounding].draw("gray22")  # afficher en gris
                     Game.dict_case_coords[surounding].draw("gray22")
         Game.dict_case_coords[Game.player.coords].draw()
 
@@ -175,25 +179,26 @@ class Game:
     def win():
         """ Cette fonction informe le joueur de sa victoire """
         Affiche("Ressources/gif/stairway-to-heaven.gif", "Félicitations, vous êtes arrivés à la porte du Paradis !")
-        Game.root.bind_all("<Key>", exit) # lier les touches à un event à self.turn
+        Game.root.bind_all("<Key>", exit)  # lier les touches à un event à self.turn
 
     @staticmethod
     def loose():
         """ Cette fonction informe le joueur de sa défaite """
         Affiche("Ressources/gif/ghost_buster.gif",
                 "Tu n'as plus d'énergie et tu erreras désormais à jamais dans les limbes")
-        Game.root.bind_all("<Key>", exit) # lie toutes les touches à un event à self.turn
+        Game.root.bind_all("<Key>", exit)  # lie toutes les touches à un event à self.turn
 
 
 class Case:
     """ Cette class concerne les cases du jeu """
+
     def __init__(self, x, y, symbole):
         """ Cette fonction initialise les paramètres de case """
-        self.x = x # attribution
-        self.y = y # attribution
-        self.coords = "{} {}".format(x, y) # les coordonnées
-        self.type = symbole # Sa représentation
-        self.color = "white" # La couleur
+        self.x = x  # attribution
+        self.y = y  # attribution
+        self.coords = "{} {}".format(x, y)  # les coordonnées
+        self.type = symbole  # Sa représentation
+        self.color = "white"  # La couleur
 
     def draw(self, color="white"):
         """ Cette fonction permet de savoir quelle symbole dessiner """
@@ -251,7 +256,7 @@ class Case:
                                            x + x_sign * 17, y + y_sign * 17,
                                            fill=self.color, tags=self.coords)
 
-    def h_wall(self, top: bool): # horizontal
+    def h_wall(self, top: bool):  # horizontal
         """ Cette fonction permet de créer la forme des murs horizontaux """
         diff = 32 if top else 0
         x = self.x * 50
@@ -303,8 +308,10 @@ class Case:
                                    x + 25 + diff * 25, y + 22,
                                    fill=self.color, tags=self.coords)
 
-    ## --------- Les Fonctions siuvantes construisent les murs verticaux horizontaux, des salles, des couloirs en fonction de la presence ----------- ##
-    ## --------- d'un mur sur la gauche/ droite/ haut/ bas, d'un couloir à gauche/droite/haut/bas ou d'une salle à gauche/droite/haut/bas ----------- ##
+    # Les Fonctions suivantes construisent les murs verticaux horizontaux, des salles, des couloirs en fonction de
+    # la presence d'un mur sur la gauche/ droite/ haut/ bas,
+    # d'un couloir à gauche/droite/haut/bas
+    # ou d'une salle à gauche/droite/haut/bas
 
     def t_h_room(self):
 
@@ -340,14 +347,14 @@ class Case:
         self.h_door(top=True)
         self.v_door(left=True)
 
-    def c_tr_room(self): # corridor top right corridor = couloir
+    def c_tr_room(self):  # corridor top right corridor = couloir
         self.base_room()
         self.h_wall(top=True)
         self.v_wall(left=False)
         self.h_door(top=False)
         self.v_door(left=True)
 
-    def tri_l_room(self): # a gauche mur
+    def tri_l_room(self):  # a gauche mur
         self.base_room()
         self.v_wall(left=True)
         self.h_door(top=True)
@@ -474,6 +481,7 @@ class Contenu:
 
 class Room(Case):
     """ Cette class permet de dire qu'une case peut être une salle """
+
     def __init__(self, x, y, symbole, contenu=Contenu()):
         super(Room, self).__init__(x, y, symbole)
         self.contenu = contenu
@@ -481,7 +489,6 @@ class Room(Case):
 
 
 class Enemy(Contenu):
-
     pass
 
 
@@ -580,7 +587,7 @@ class Player:
         self.y = Game.reception.y
         self.energy = 3
 
-    def move(self, x=None, y=None): # je vois pas l'utilité
+    def move(self, x=None, y=None):  # je vois pas l'utilité
         self.x = x if x else self.x
         self.y = y if y else self.y
 
