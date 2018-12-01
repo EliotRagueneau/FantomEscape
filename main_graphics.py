@@ -153,11 +153,9 @@ class Game:
     @staticmethod
     def show_surroundings():
         Game.canvas.delete("all")
-        if Game.player.coords not in Game.dict_room_coords:  # si le joueur n'est dans une chambre
+        if Game.player.coords not in Game.dict_room_coords:  # si le joueur n'est pas dans une chambre
             for surounding in Game.player.surrounding_coords:  # pour les éléments autour de lui
                 if surounding in Game.dict_case_coords:  # si autour de lui c'est une case
-                    if surounding in Game.dict_room_coords:  # si autour de lui c'est une salle
-                        Game.dict_case_coords[surounding].draw("gray22")  # afficher en gris
                     Game.dict_case_coords[surounding].draw("gray22")
         Game.dict_case_coords[Game.player.coords].draw()
 
@@ -179,14 +177,14 @@ class Game:
     def win():
         """ Cette fonction informe le joueur de sa victoire """
         Affiche("Ressources/gif/stairway-to-heaven.gif", "Félicitations, vous êtes arrivés à la porte du Paradis !")
-        Game.root.bind_all("<Key>", exit)  # lier les touches à un event à self.turn
+        Game.root.bind_all("<Key>", exit)  # Si le joueur appuie sur une touche : quitte l'application
 
     @staticmethod
     def loose():
         """ Cette fonction informe le joueur de sa défaite """
         Affiche("Ressources/gif/ghost_buster.gif",
                 "Tu n'as plus d'énergie et tu erreras désormais à jamais dans les limbes")
-        Game.root.bind_all("<Key>", exit)  # lie toutes les touches à un event à self.turn
+        Game.root.bind_all("<Key>", exit)  # Si le joueur appuie sur une touche : quitte l'application
 
 
 class Case:
@@ -236,9 +234,7 @@ class Case:
 
                          "⊥": self.tri_b_corridor,
 
-                         "O": self.porte
-
-                         }
+                         "O": self.porte}
         self.color = color
         dict_drawings[self.type]()
 
@@ -469,9 +465,6 @@ class Case:
 
 
 class Contenu:
-    def __repr__(self):
-        return "Salle vide"
-
     def effect(self):
         pass
 
@@ -504,9 +497,6 @@ class LandLord(Enemy):
         Affiche("Ressources/gif/majordome.gif", "Retourne donc à la Réception mon très cher Gasper !")
         Game.player.move(Game.reception.x, Game.reception.y)
 
-    def __repr__(self):
-        return "LandLord"
-
 
 class MadScientist(Enemy):
     """Classe d'ennemie: Le Scientifique Fou"""
@@ -525,9 +515,6 @@ class MadScientist(Enemy):
         if chosen_case.coords in Game.dict_room_coords:
             Game.dict_room_coords[chosen_case.coords].contenu.effect()
 
-    def __repr__(self):
-        return "MadScientist"
-
 
 class Bibendum(Enemy):
     """Classe d'ennemi: Bibendum"""
@@ -541,16 +528,10 @@ class Bibendum(Enemy):
         Affiche("Ressources/gif/bibendum.gif", "Vous êtes paralysés et perdez 2 énergies")
         Game.player.energy -= 2
 
-    def __repr__(self):
-        return "Bibbendum"
-
 
 class Energy(Contenu):
     def __init__(self, amount):
         self.amount = amount
-
-    def __repr__(self):
-        return "{} pintes vertes d'énergie".format(self.amount)
 
     def effect(self):
         if self.amount:
@@ -560,7 +541,8 @@ class Energy(Contenu):
 
 
 class Affiche:
-    def __init__(self, file, text):
+    """Classe permettant de générer une affiche qui va apparaître au joueur en fonction d'une image et d'un message"""
+    def __init__(self, file, message):
         self.affiche = Toplevel(Game.root)
         self.frame = Frame(self.affiche, bg="black")
         self.frame.pack()
@@ -568,7 +550,7 @@ class Affiche:
 
         self.image_label = Label(self.frame, image=self.image)
         self.image_label.pack()
-        self.label = Label(self.frame, bg="black", fg="white", text=text, font=("Helvetica", "16"))
+        self.label = Label(self.frame, bg="black", fg="white", text=message, font=("Helvetica", "16"))
         self.label.pack()
         Game.root.bind_all("<Key>", self._close)
 
@@ -587,16 +569,18 @@ class Player:
         self.y = Game.reception.y
         self.energy = 3
 
-    def move(self, x=None, y=None):  # je vois pas l'utilité
-        self.x = x if x else self.x
-        self.y = y if y else self.y
+    def move(self, x: int, y: int):
+        """Permet de déplacer le joueur à un jeu de coordonnées précises
+                Utile pour le LandLord et le MadScientist"""
+        self.x = x
+        self.y = y
 
     def move_up(self):
-        """ Permet au joueur de se deplacer vers l'avant"""
+        """ Permet au joueur d'aller en haut"""
         self.y -= 1
 
     def move_down(self):
-        """ Permet au joueur de reculer """
+        """ Permet au joueur d'aller en bas """
         self.y += 1
 
     def move_left(self):
