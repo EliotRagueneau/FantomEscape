@@ -104,29 +104,30 @@ class Game:
                           "{} {}".format(x, y + 1): (("s", "Down", "KP_2"), Game.player.move_down),
                           "{} {}".format(x + 1, y): (("d", "Right", "KP_6"), Game.player.move_right)
                           } # dans un dictionnaire, mettre la choix du joueur
-        order = event.keysym
+        order = event.keysym # pemet de voir quelle touche le joueur a choisi
         Game.console["text"] = ""
         for contour_coord in contour_coords:
             if contour_coord in Game.dict_case_coords and order in contour_coords[contour_coord][0]: # vérifier si l'ordre est présent dans le dico
                 Game.dict_case_coords[Game.player.coords].clear()
                 contour_coords[contour_coord][1]()
-                Game.show_surroundings()
+                Game.show_surroundings() #
 
-        for key in Game.player.surrounding_coords:
-            if key in Game.dict_room_coords:
-                Game.dict_room_coords[key].contenu.signature()
+        for key in Game.player.surrounding_coords: # pour les clés du dico
+            if key in Game.dict_room_coords: # si la clé est présente
+                Game.dict_room_coords[key].contenu.signature() # affichage du message
 
-        if Game.player.coords in Game.dict_room_coords:
-            Game.dict_room_coords[Game.player.coords].contenu.effect()
+        if Game.player.coords in Game.dict_room_coords: # si le joueur est dans une salle
+            Game.dict_room_coords[Game.player.coords].contenu.effect() # afficher l'effet que contient la salle
             Game.show_surroundings()
 
-        if Game.player.coords == Game.porte.coords:
-            Game.win()
+        if Game.player.coords == Game.porte.coords: # si le joueur atteint les coordonnées de la porte du paradis
+            Game.win() # il gagne
 
         Game.energy["text"] = "{} pintes d'énergies".format(Game.player.energy)
 
     @staticmethod
     def _gen_basic():
+        """ Génère la matrice map basique telle que montrée dans le sujet """
         return [[" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "],
                 [" ", " ", " ", "⎾", "⏤", "⏋", " ", "O", " ", " ", " "],
                 [" ", " ", " ", "|", " ", "|", " ", "|", " ", " ", " "],
@@ -142,46 +143,54 @@ class Game:
     @staticmethod
     def show_surroundings():
         Game.canvas.delete("all")
-        if Game.player.coords not in Game.dict_room_coords:
-            for surounding in Game.player.surrounding_coords:
-                if surounding in Game.dict_case_coords:
-                    if surounding in Game.dict_room_coords:
-                        Game.dict_case_coords[surounding].draw("gray22")
+        if Game.player.coords not in Game.dict_room_coords: # si le joueur n'est dans une chambre
+            for surounding in Game.player.surrounding_coords: # pour les éléments autour de lui
+                if surounding in Game.dict_case_coords: # si autour de lui c'est une case
+                    if surounding in Game.dict_room_coords: # si autour de lui c'est une salle
+                        Game.dict_case_coords[surounding].draw("gray22") # afficher en gris
                     Game.dict_case_coords[surounding].draw("gray22")
         Game.dict_case_coords[Game.player.coords].draw()
 
     def show_map(self):
-        for case in Game.dict_case_coords:
-            Game.dict_case_coords[case].draw()
+        """ Cette fonction permet d'afficher la map """
+        for case in Game.dict_case_coords: # Pour chaque case que contient le jeu
+            Game.dict_case_coords[case].draw() # Les afficher
 
     @staticmethod
     def _gen_random():
+        """ Cette fonction permet de générer une map aléatoirement """
         pass
 
     def __repr__(self):
+        """ cette fonction permet de représneter la map correctement """
         return "\n".join(["".join(line) for line in Game.matrice])
 
     @staticmethod
     def win():
+        """ Cette fonction informe le joueur de sa victoire """
         Affiche("Ressources/gif/stairway-to-heaven.gif", "Félicitations, vous êtes arrivés à la porte du Paradis !")
-        Game.root.bind_all("<Key>", exit)
+        Game.root.bind_all("<Key>", exit) # lier les touches à un event à self.turn
 
     @staticmethod
     def loose():
+        """ Cette fonction informe le joueur de sa défaite """
         Affiche("Ressources/gif/ghost_buster.gif",
                 "Tu n'as plus d'énergie et tu erreras désormais à jamais dans les limbes")
-        Game.root.bind_all("<Key>", exit)
+        Game.root.bind_all("<Key>", exit) # lie toutes les touches à un event à self.turn
 
 
 class Case:
+    """ Cette class concerne les cases du jeu """
     def __init__(self, x, y, symbole):
-        self.x = x
-        self.y = y
-        self.coords = "{} {}".format(x, y)
-        self.type = symbole
-        self.color = "white"
+        """ Cette fonction initialise les paramètres de case """
+        self.x = x # attribution
+        self.y = y # attribution
+        self.coords = "{} {}".format(x, y) # les coordonnées
+        self.type = symbole # Sa représentation
+        self.color = "white" # La couleur
 
     def draw(self, color="white"):
+        """ Cette fonction permet de savoir quelle symbole dessiner """
         dict_drawings = {"⍈": self.t_h_room,
 
                          "x": self.reception,
@@ -223,6 +232,7 @@ class Case:
         dict_drawings[self.type]()
 
     def base_room(self):
+        """ cette fonction permet de créer la forme d'une salle standard """
         x = self.x * 50 + 25
         y = self.y * 25 + 12.5
         for x_sign in (1, -1):
@@ -235,7 +245,8 @@ class Case:
                                            x + x_sign * 17, y + y_sign * 17,
                                            fill=self.color, tags=self.coords)
 
-    def h_wall(self, top: bool):
+    def h_wall(self, top: bool): # horizontal
+    """ Cette fonction permet de créer la forme des murs horizontaux """
         diff = 32 if top else 0
         x = self.x * 50
         y = self.y * 25 - 12.5
@@ -246,6 +257,7 @@ class Case:
                                    fill=self.color, tags=self.coords)
 
     def v_wall(self, left: bool):
+        """ Cette fonction permet de créer la forme des murs verticaux """
         diff = 32 if left else 0
         x = self.x * 50
         y = self.y * 25 - 12.5
@@ -256,8 +268,8 @@ class Case:
                                    fill=self.color, tags=self.coords)
 
     def h_door(self, top: bool):
+        """ Cette fonction permet de créer la forme des portes horizontales """
         diff = -1 if top else 1
-
         x = self.x * 50
         y = self.y * 25 + 12.5
         Game.canvas.create_polygon(x + 20, y + diff * 25,
@@ -271,8 +283,8 @@ class Case:
                                    fill=self.color, tags=self.coords)
 
     def v_door(self, left: bool):
+        """ Cette fonction permet de créer la forme des portes horizontales """
         diff = -1 if left else 1
-
         x = self.x * 50
         y = self.y * 25 - 12.5
         Game.canvas.create_polygon(x + 25 + diff * 25, y + 20,
@@ -285,7 +297,11 @@ class Case:
                                    x + 25 + diff * 25, y + 22,
                                    fill=self.color, tags=self.coords)
 
+    ## --------- Les Fonctions siuvantes construisent les murs verticaux horizontaux, des salles, des couloirs en fonction de la presence ----------- ##
+    ## --------- d'un mur sur la gauche/ droite/ haut/ bas, d'un couloir à gauche/droite/haut/bas ou d'une salle à gauche/droite/haut/bas ----------- ##
+
     def t_h_room(self):
+
         self.base_room()
         self.h_wall(top=True)
         self.h_wall(top=False)
@@ -318,14 +334,14 @@ class Case:
         self.h_door(top=True)
         self.v_door(left=True)
 
-    def c_tr_room(self):
+    def c_tr_room(self): # corridor top right corridor = couloir
         self.base_room()
         self.h_wall(top=True)
         self.v_wall(left=False)
         self.h_door(top=False)
         self.v_door(left=True)
 
-    def tri_l_room(self):
+    def tri_l_room(self): # a gauche mur
         self.base_room()
         self.v_wall(left=True)
         self.h_door(top=True)
@@ -393,6 +409,7 @@ class Case:
         self.corner_corridor(top=True, left=False)
 
     def cross_section(self):
+        """ Cette donction permet de créer des inter sections """
         x = self.x * 50 + 25
         y = self.y * 25 + 12.5
         for x_sign in (1, -1):
@@ -406,6 +423,7 @@ class Case:
                                            fill=self.color, tags=self.coords)
 
     def tri_b_corridor(self):
+        """ Cette fonction permet de créer un couloir quand y'a un mur en bas de la map """
         x = self.x * 50 + 25
         y = self.y * 25 + 12.5
         Game.canvas.create_polygon(x + 25, y + 5,
@@ -423,6 +441,7 @@ class Case:
                                        fill=self.color, tags=self.coords)
 
     def porte(self):
+        """ Cette fonction permet de créer une porte """
         self.base_room()
         self.h_wall(top=True)
         self.v_wall(left=True)
@@ -448,6 +467,7 @@ class Contenu:
 
 
 class Room(Case):
+    """ Cette class permet de dire qu'une case peut être une salle """
     def __init__(self, x, y, symbole, contenu=Contenu()):
         super(Room, self).__init__(x, y, symbole)
         self.contenu = contenu
@@ -455,14 +475,19 @@ class Room(Case):
 
 
 class Enemy(Contenu):
+
     pass
 
 
 class LandLord(Enemy):
+    """Classe d'ennemie: Le Maître du Chateau"""
+
     def signature(self):
+        """Signature du Maître du Chateau perçue quand le joueur se trouve autour de la pièce le contenant"""
         Game.console["text"] += "Cling cling\n"
 
     def effect(self):
+        """Effet invoqué quand le joueur se trouve dans la pièce contenant le Maître du Chateau"""
         Affiche("Ressources/gif/majordome.gif", "Retourne donc à la Réception mon très cher Gasper !")
         Game.player.move(Game.reception.x, Game.reception.y)
 
@@ -471,10 +496,14 @@ class LandLord(Enemy):
 
 
 class MadScientist(Enemy):
+    """Classe d'ennemie: Le Scientifique Fou"""
+
     def signature(self):
+        """Signature du Scientifique Fou perçue quand le joueur se trouve autour de la pièce le contenant"""
         Game.console["text"] += "Mwah ah ah !\n"
 
     def effect(self):
+        """Effet invoqué quand le joueur se trouve dans la pièce contenant le Scientifique Fou"""
         Affiche("Ressources/gif/Mad_Scientist.gif", "Tu es téléporté dans une salle aléatoire et tu perd 1 énergie")
         Game.player.energy -= 1
         chosen_case = Game.dict_case_coords[rd.choice(list(Game.dict_case_coords))]
@@ -485,10 +514,14 @@ class MadScientist(Enemy):
 
 
 class Bibendum(Enemy):
+    """Classe d'ennemi: Bibendum"""
+
     def signature(self):
+        """Signature du Bibendum perçue quand le joueur se trouve autour de la pièce le contenant"""
         Game.console["text"] += "Ça sent bon par ici !\n"
 
     def effect(self):
+        """Effet invoqué quand le joueur se trouve dans la pièce contenant le Bibendum"""
         Affiche("Ressources/gif/bibendum.gif", "Vous êtes paralysés et perdez 2 énergies")
         Game.player.energy -= 2
 
@@ -533,24 +566,29 @@ class Affiche:
 class Player:
 
     def __init__(self):
+        """Initialise la position du joueur"""
         self.x = Game.reception.x
         self.y = Game.reception.y
         self.energy = 3
 
-    def move(self, x=None, y=None):
+    def move(self, x=None, y=None): # je vois pas l'utilité
         self.x = x if x else self.x
         self.y = y if y else self.y
 
     def move_up(self):
+        """ Permet au joueur de se deplacer vers l'avant"""
         self.y -= 1
 
     def move_down(self):
+        """ Permet au joueur de reculer """
         self.y += 1
 
     def move_left(self):
+        """ Permet au joueur d'aller à gauche """
         self.x -= 1
 
     def move_right(self):
+        """ Permet au joueur d'aller à droite """
         self.x += 1
 
     @property
