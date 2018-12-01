@@ -1,45 +1,46 @@
 import random as rd
 import illustration
+from typing import *
 
 
 class Game:
-    """Classe regroupant l'ensemble des fonctionnalités du jeu
-        Contrôles:
-            z  ==> Aller en haut
-            q  ==> Aller à gauche
-            s  ==> Aller en bas
-            d  ==> Aller à droite """
+    """Classe regroupant l'ensemble des fonctionnalités du jeu"""
 
     matrice = reception = porte = player = None
     dict_room_coords = {}
     dict_case_coords = {}
 
-    def __init__(self, basic: bool = True):
-        """ Cette fonction initialise le plateau le jeu
+    def __init__(self, basic: bool = True, difficulty: float = 0):
+        """ Cette fonction initialise le plateau le jeu; 0 > difficulty > 1
             Elle permet également de choisir la generation basique ou random """
 
-        print(" \n Contrôles: \n \t z ou 8 ==> Aller en haut \n \t q ou 4 ==> Aller à gauche \n \t s ou 2 ==> Aller en bas \n \t d ou 6 ==> Aller à droite \n ")
+        print("\nContrôles:",
+              "\tz ou 8 ==> Aller en haut",
+              "\tq ou 4 ==> Aller à gauche ",
+              "\ts ou 2 ==> Aller en bas ",
+              "\td ou 6 ==> Aller à droite \n",
+              sep="\n")
 
         Game.matrice = Game._gen_basic() if basic else Game._gen_random()  # Récupère la matrice de jeu
 
         # Récupération des informations contenus dans la matrice #
 
         for y in range(len(Game.matrice)):  # Pour chaque coordonnées sur la matrice
-            for x in range(len(Game.matrice[y])):
+            for x in range(len(Game.matrice[0])):
 
                 current_case = Game.matrice[y][x]  # On récupère la case de la matrice définie par ses coordonnées
 
-                if current_case != " ":  # Si la case n'est pas vide
-                    Game.dict_case_coords["{} {}".format(x, y)] = Case(x, y, current_case)  # Alors c'est une case
+                if current_case != " ":
+                    Game.dict_case_coords[(x, y)] = Case(x, y, current_case)  # Case accessible au joueur
 
-                if current_case in ["┏", "⍈", "┏", "┣", "┗", "┓", "┫", "┛"]:  # Si la case fait partie de cette liste
-                    Game.dict_room_coords["{} {}".format(x, y)] = Room(x, y, current_case)  # Alors c'est une salle
+                    if current_case in ["┏", "⍈", "┏", "┣", "┗", "┓", "┫", "┛"]:
+                        Game.dict_room_coords[(x, y)] = Room(x, y, current_case)  # Salle
 
-                if current_case == "x":  # Si la case correspond à la réception
-                    Game.reception = Room(x, y, current_case)  # On sauvegarde sa position
+                    elif current_case == "x":  # Si la case correspond à la réception
+                        Game.reception = Room(x, y, current_case)  # On sauvegarde sa position
 
-                elif current_case == "O":  # Si la case est la porte du paradis
-                    Game.porte = Room(x, y, current_case)  # On sauvegarde sa position
+                    elif current_case == "O":  # Si la case est la porte du paradis
+                        Game.porte = Room(x, y, current_case)  # On sauvegarde sa position
 
         # Distribution des pintes d'énergies #
 
@@ -50,23 +51,34 @@ class Game:
             liste_pinte.append(new_amount)
             total_pinte -= new_amount
 
-        # Choix aléatoire des salles contenant quelque chose #
+        # Détermination du nombre de monstres vis à vis de la difficulté donnée #
 
-        list_filled_room_coords = rd.sample(list(Game.dict_room_coords), 5 + len(liste_pinte))
+        if not difficulty:  # Si l'utilisateur ne précise pas la difficulté
+            n_monster = 5  # 5 monstres de base
+        elif difficulty < 1:
+            n_monster = int(difficulty * (len(Game.dict_room_coords) - len(liste_pinte)))
+        else:  # 1 ou plus ==> Que des monstres et des pintes
+            n_monster = len(Game.dict_room_coords) - len(liste_pinte)
 
-        Game.dict_room_coords[list_filled_room_coords[0]].contenu = LandLord()
+        # Choix aléatoire des salles contenant quelque chose parmi toutes les salles possibles#
 
-        Game.dict_room_coords[list_filled_room_coords[1]].contenu = MadScientist()
+        list_filled_room_coords = rd.sample(list(Game.dict_room_coords), n_monster + len(liste_pinte))
 
-        for enemy_room in list_filled_room_coords[2:5]:  # Localisation des 3 Bibendum
-            Game.dict_room_coords[enemy_room].contenu = Bibendum()
-
-        n = 0
-        for pinte_room in list_filled_room_coords[5:]:
-            Game.dict_room_coords[pinte_room].contenu = Energy(liste_pinte[n])
-            n += 1
+        # Remplissage de ces salles #
+        n_pinte = 0  # Pointeur de pinte dans liste_pinte
+        for i in range(len(list_filled_room_coords)):
+            if i == 0:  # Un seul LandLord
+                Game.dict_room_coords[list_filled_room_coords[i]].contenu = LandLord()
+            elif i < 0.4 * n_monster:  # 40% du reste des monstres serons des Mad Scientist
+                Game.dict_room_coords[list_filled_room_coords[i]].contenu = MadScientist()
+            elif i < n_monster:  # Le reste des monstres seront des Bibendum
+                Game.dict_room_coords[list_filled_room_coords[i]].contenu = Bibendum()
+            else:  # Hors monstre ==> Énergie définis par liste_pinte
+                Game.dict_room_coords[list_filled_room_coords[i]].contenu = Energy(liste_pinte[n_pinte])
+                n_pinte += 1
 
         # Fin de l'initialisation #
+
         Game.player = Player()  # Placage du joueur à la réception
         self.turn()  # Premier tour de jeu
 
@@ -94,22 +106,19 @@ class Game:
     def turn(self):
         """Définit le déroulement de chaque tour du jeu"""
         # Récupération des coordonnées du joueur
-        x = Game.player.x
-        y = Game.player.y
+        x, y = Game.player.coords
 
-        keys = {}  # Initialise le dictionnaire contenant les mouvements possibles du joueur à chaque tour
+        possible_order = {}  # Initialise le dictionnaire contenant les mouvements possibles du joueur à chaque tour
 
-        contour = {"{} {}".format(x, y - 1): {"new_coords": (x, y - 1), "order": ("z", "8")},
-                   "{} {}".format(x - 1, y): {"new_coords": (x - 1, y), "order": ("q", "4")},
-                   "{} {}".format(x, y + 1): {"new_coords": (x, y + 1), "order": ("s", "2")},
-                   "{} {}".format(x + 1, y): {"new_coords": (x + 1, y), "order": ("d", "6")}
-                   }
+        contour = {(x, y - 1): ("z", "8"),
+                   (x - 1, y): ("q", "4"),
+                   (x, y + 1): ("s", "2"),
+                   (x + 1, y): ("d", "6")}
 
         for contour_coords in contour:
-
             if contour_coords in Game.dict_case_coords:  # Si ce qui se trouve autour du joueur est une case
-                for order in contour[contour_coords]["order"]:
-                    keys[order] = contour[contour_coords]["new_coords"]  # Alors le joueur peut s'y déplacer
+                for order in contour[contour_coords]:  # Alors le joueur peut s'y déplacer via différends ordres
+                    possible_order[order] = contour_coords  # Ordres que l'on stocke dans le dictionnaire keys
 
                 if contour_coords in Game.dict_room_coords:  # Et si c'est une salle
                     Game.dict_room_coords[contour_coords].contenu.signature()  # On exécute la signature de son contenu
@@ -118,8 +127,8 @@ class Game:
 
         order = input()  # Récupère l'ordre de mouvement du joueur
 
-        if order in keys:  # Si l'ordre du joueur se trouve bien dans les possibilités définies plus tôt
-            Game.player.move(keys[order][0], keys[order][1])  # Le joueur se déplace vers la direction souhaitée
+        if order in possible_order:  # Si l'ordre du joueur se trouve bien dans les possibilités définies plus tôt
+            Game.player.move(possible_order[order])  # Le joueur se déplace vers la direction souhaitée
 
             if Game.player.coords in Game.dict_room_coords:  # Si le joueur arrive dans une salle
                 Game.dict_room_coords[Game.player.coords].contenu.effect()  # On execute l'effet de la salle
@@ -161,7 +170,7 @@ class Case:
         """Initialise chaque instance de case par ses coordonnées et son type définit par la matrice"""
         self.x = x
         self.y = y
-        self.coords = "{} {}".format(x, y)
+        self.coords = (x, y)
         self.type = symbole
 
     def __repr__(self):
@@ -171,9 +180,6 @@ class Case:
 
 class Contenu:
     """Classe mère de tous ce que peut contenir une salle"""
-
-    def __repr__(self):
-        return "Salle vide"
 
     def effect(self):
         """Effet invoqué quand le joueur se trouve dans la pièce contenant l'énergie"""
@@ -197,11 +203,9 @@ class Energy(Contenu):
     """Classe définissant l'effet des salles contenant de l'énergie"""
 
     def __init__(self, amount):
-        """Initialise le contenue en énergie par le nombre d'énergie qu'elle contient"""
         self.amount = amount
 
     def effect(self):
-        """Effet invoqué quand le joueur se trouve dans la pièce contenant l'énergie"""
         illustration.energy()
         print("Vous avez trouver {} pintes d'ectoplasme vert".format(self.amount))
         Game.player.energy += self.amount
@@ -224,7 +228,7 @@ class LandLord(Enemy):
         """Effet invoqué quand le joueur se trouve dans la pièce contenant le Maître du Chateau"""
         illustration.land_lord()
         input()
-        Game.player.move(Game.reception.x, Game.reception.y)
+        Game.player.move(Game.reception.coords)
 
 
 class MadScientist(Enemy):
@@ -240,7 +244,7 @@ class MadScientist(Enemy):
         print("Dans sa fureur, il vous téléporte dans une salle aléatoire !")
         Game.player.energy -= 1
         chosen_case = Game.dict_case_coords[rd.choice(list(Game.dict_case_coords))]
-        Game.player.move(chosen_case.x, chosen_case.y)
+        Game.player.move(chosen_case.coords)
 
         print("Le bougre en a profiter pour vous subtiliser une pinte d'énergie ...")
         input()
@@ -267,17 +271,13 @@ class Player:
 
     def __init__(self):
         """Initialise la position du joueur"""
-        self.x = Game.reception.x
-        self.y = Game.reception.y
-        self.coords = "{} {}".format(self.x, self.y)
+        self.coords = Game.reception.coords
         self.energy = 3
 
-    def move(self, x, y):
+    def move(self, coords: Tuple[int]):
         """Permet au joueur de bouger au nouvelles coordonnées x y données"""
-        self.x = x
-        self.y = y
-        self.coords = "{} {}".format(self.x, self.y)
+        self.coords = coords
 
 
 if __name__ == "__main__":
-    game = Game()
+    game = Game(difficulty=0.5)
