@@ -9,7 +9,7 @@ class Game:
     dict_room_coords = {}
     dict_case_coords = {}
 
-    def __init__(self, basic: bool = True, difficulty: float = 1):
+    def __init__(self, basic: bool = True, difficulty: float = 0):
         Game.matrice = Game._gen_basic() if basic else Game._gen_random()
 
         # Récupération des informations contenus dans la matrice #
