@@ -95,18 +95,19 @@ class Game:
         Game.root.mainloop()
 
     @staticmethod
-    def move(event): 
-        x = Game.player.x
-        y = Game.player.y
+    def move(event):
+        """ Cette fonction définit les mouvements possible du joueur"""
+        x = Game.player.x # définit la coordoonée x du joueur
+        y = Game.player.y # définit la coordonnée y du joueur
         contour_coords = {"{} {}".format(x, y - 1): (("z", "Up", "KP_8"), Game.player.move_up),
                           "{} {}".format(x - 1, y): (("q", "Left", "KP_4"), Game.player.move_left),
                           "{} {}".format(x, y + 1): (("s", "Down", "KP_2"), Game.player.move_down),
                           "{} {}".format(x + 1, y): (("d", "Right", "KP_6"), Game.player.move_right)
-                          }
+                          } # dans un dictionnaire, mettre la choix du joueur
         order = event.keysym
         Game.console["text"] = ""
         for contour_coord in contour_coords:
-            if contour_coord in Game.dict_case_coords and order in contour_coords[contour_coord][0]:
+            if contour_coord in Game.dict_case_coords and order in contour_coords[contour_coord][0]: # vérifier si l'ordre est présent dans le dico
                 Game.dict_case_coords[Game.player.coords].clear()
                 contour_coords[contour_coord][1]()
                 Game.show_surroundings()
