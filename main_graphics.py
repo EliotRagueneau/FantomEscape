@@ -18,10 +18,10 @@ class Game:
             for x in range(len(Game.matrice[y])):
                 current_case = Game.matrice[y][x]  # On récupère la case de la matrice définie par ses coordonnées
                 if current_case != " ":  # Si la case n'est pas vide
-                    Game.dict_case_coords["{} {}".format(x, y)] = Case(x, y, current_case)  # Alors c'est une case
+                    Game.dict_case_coords[(x, y)] = Case(x, y, current_case)  # Alors c'est une case
 
                 if current_case in ["┏", "⍈", "┏", "┣", "┗", "┓", "┫", "┛"]:  # Si la case fait partie de cette liste
-                    Game.dict_room_coords["{} {}".format(x, y)] = Room(x, y, current_case)  # Alors c'est une salle
+                    Game.dict_room_coords[(x, y)] = Room(x, y, current_case)  # Alors c'est une salle
 
                 if current_case == "x":  # Si la case correspond à la réception
                     Game.reception = Room(x, y, current_case)  # On sauvegarde sa position
@@ -108,10 +108,10 @@ class Game:
     def turn(event):
         x = Game.player.x
         y = Game.player.y
-        contour_coords = {"{} {}".format(x, y - 1): (("z", "Up", "KP_8"), Game.player.move_up),
-                          "{} {}".format(x - 1, y): (("q", "Left", "KP_4"), Game.player.move_left),
-                          "{} {}".format(x, y + 1): (("s", "Down", "KP_2"), Game.player.move_down),
-                          "{} {}".format(x + 1, y): (("d", "Right", "KP_6"), Game.player.move_right)
+        contour_coords = {(x, y - 1): (("z", "Up", "KP_8"), Game.player.move_up),
+                          (x - 1, y): (("q", "Left", "KP_4"), Game.player.move_left),
+                          (x, y + 1): (("s", "Down", "KP_2"), Game.player.move_down),
+                          (x + 1, y): (("d", "Right", "KP_6"), Game.player.move_right)
                           }  # dans un dictionnaire, mettre la choix du joueur
         order = event.keysym  # pemet de voir quelle touche le joueur a choisi
         Game.console["text"] = ""
@@ -194,7 +194,7 @@ class Case:
         """ Cette fonction initialise les paramètres de case """
         self.x = x  # attribution
         self.y = y  # attribution
-        self.coords = "{} {}".format(x, y)  # les coordonnées
+        self.coords = (x, y)  # les coordonnées
         self.type = symbole  # Sa représentation
         self.color = "white"  # La couleur
 
@@ -478,7 +478,7 @@ class Room(Case):
     def __init__(self, x, y, symbole, contenu=Contenu()):
         super(Room, self).__init__(x, y, symbole)
         self.contenu = contenu
-        Game.dict_case_coords["{} {}".format(x, y)] = self
+        Game.dict_case_coords[(x, y)] = self
 
 
 class Enemy(Contenu):
@@ -542,6 +542,7 @@ class Energy(Contenu):
 
 class Affiche:
     """Classe permettant de générer une affiche qui va apparaître au joueur en fonction d'une image et d'un message"""
+
     def __init__(self, file, message):
         self.affiche = Toplevel(Game.root)
         self.frame = Frame(self.affiche, bg="black")
@@ -593,14 +594,14 @@ class Player:
 
     @property
     def coords(self):
-        return "{} {}".format(self.x, self.y)
+        return self.x, self.y
 
     @property
     def surrounding_coords(self):
-        return ["{} {}".format(self.x, self.y - 1),
-                "{} {}".format(self.x - 1, self.y),
-                "{} {}".format(self.x, self.y + 1),
-                "{} {}".format(self.x + 1, self.y)]
+        return [(self.x, self.y - 1),
+                (self.x - 1, self.y),
+                (self.x, self.y + 1),
+                (self.x + 1, self.y)]
 
 
 if __name__ == "__main__":

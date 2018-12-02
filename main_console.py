@@ -82,6 +82,10 @@ class Game:
         Game.player = Player()  # Placage du joueur à la réception
         self.turn()  # Premier tour de jeu
 
+
+
+
+
     @staticmethod
     def _gen_basic():
         """Génère la matrice map basique telle que montrée dans le sujet"""
