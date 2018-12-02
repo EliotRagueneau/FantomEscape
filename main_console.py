@@ -108,6 +108,7 @@ class Game:
         # Récupération des coordonnées du joueur
         x, y = Game.player.coords
 
+        print("Vous avez {} d'énergies\n".format(Game.player.energy))
         possible_order = {}  # Initialise le dictionnaire contenant les mouvements possibles du joueur à chaque tour
 
         contour = {(x, y - 1): ("z", "8"),
