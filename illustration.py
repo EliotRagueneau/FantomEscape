@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 def win():
     """Illustration de victoire"""
     print("                                                   .-')                 ",
