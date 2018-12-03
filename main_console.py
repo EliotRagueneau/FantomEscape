@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 import random as rd
-import illustration
 from typing import *
+
+import illustration
 
 
 class Game:

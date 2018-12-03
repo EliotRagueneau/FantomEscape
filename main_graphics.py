@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-from tkinter import *
 import random as rd
+from tkinter import *
 
 
 class Game:
